@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Debug</title>
+  <style>
+    body { padding: 20px; font-family: monospace; }
+    .log { margin: 5px 0; padding: 5px; background: #f0f0f0; }
+    .error { background: #ffcccc; }
+    .success { background: #ccffcc; }
+  </style>
+</head>
+<body>
+  <h1>TikTok Clone Debug</h1>
+  <div id="logs"></div>
+  
+  <script>
+    const logs = document.getElementById('logs');
+    
+    function log(msg, type = 'log') {
+      const div = document.createElement('div');
+      div.className = `log ${type}`;
+      div.textContent = msg;
+      logs.appendChild(div);
+      console.log(msg);
+    }
+    
+    // Override console.error
+    const originalError = console.error;
+    console.error = function(...args) {
+      log('ERROR: ' + args.join(' '), 'error');
+      originalError.apply(console, args);
+    };
+    
+    log('Starting debug...');
+  </script>
+  
+  <!-- Load Lynx -->
+  <script src="lib/lynx-core.js"></script>
+  <script>
+    log('Lynx loaded: ' + (typeof lynx !== 'undefined'));
+    log('LynxComponent loaded: ' + (typeof LynxComponent !== 'undefined'));
+  </script>
+  
+  <!-- Test simple component -->
+  <script>
+    class TestComponent extends LynxComponent {
+      constructor() {
+        // No super() call
+        this.message = 'Hello from TestComponent';
+      }
+      
+      render() {
+        return lynx.div({ style: { padding: '20px', background: '#e0e0e0' } }, [
+          lynx.text({ content: this.message })
+        ]);
+      }
+    }
+    
+    try {
+      lynx.registerComponent('test-component', TestComponent);
+      log('TestComponent registered', 'success');
+    } catch (e) {
+      log('Failed to register TestComponent: ' + e.message, 'error');
+    }
+  </script>
+  
+  <!-- Mount test -->
+  <div id="test-mount" style="border: 1px solid #000; margin: 20px 0; padding: 10px;">
+    Test mount area
+  </div>
+  
+  <script>
+    setTimeout(() => {
+      try {
+        const mount = document.getElementById('test-mount');
+        lynx.mount(mount, lynx.element('test-component'));
+        log('Test component mounted', 'success');
+      } catch (e) {
+        log('Failed to mount: ' + e.message, 'error');
+      }
+    }, 100);
+  </script>
+  
+  <!-- Load real components -->
+  <script src="components/VideoPlayer.js"></script>
+  <script>
+    log('VideoPlayer loaded: ' + (typeof VideoPlayer !== 'undefined'));
+    if (typeof VideoPlayer !== 'undefined') {
+      try {
+        lynx.registerComponent('video-player', VideoPlayer);
+        log('VideoPlayer registered', 'success');
+      } catch (e) {
+        log('Failed to register VideoPlayer: ' + e.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -52,12 +52,17 @@
             this._componentInstance = new ComponentClass();
             this._componentInstance.shadowRoot = this.shadowRoot;
             
-            // Copy properties
+            // Copy properties and methods
             Object.keys(ComponentClass.properties || {}).forEach(prop => {
               if (this._componentInstance.hasOwnProperty(prop)) {
                 this[prop] = this._componentInstance[prop];
               }
             });
+            
+            // Bind render method to instance
+            if (this._componentInstance.render) {
+              this._componentInstance.render = this._componentInstance.render.bind(this._componentInstance);
+            }
           }
           
           connectedCallback() {
@@ -65,6 +70,8 @@
             if (this._componentInstance.connectedCallback) {
               this._componentInstance.connectedCallback.call(this._componentInstance);
             }
+            // Force render after connected
+            this._render();
           }
           
           render() {

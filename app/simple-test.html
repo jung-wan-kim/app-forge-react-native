@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Test</title>
+  <style>
+    body { padding: 20px; }
+    #app { border: 2px solid red; min-height: 100px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Simple Component Test</h1>
+  <div id="app">Loading...</div>
+  
+  <script src="lib/lynx-core.js"></script>
+  <script>
+    // Simple test component
+    class SimpleApp {
+      render() {
+        return lynx.div({ style: { padding: '20px', background: '#f0f0f0' } }, [
+          lynx.text({ content: 'TikTok Clone App is working!' }),
+          lynx.div({ style: { marginTop: '10px' } }, [
+            lynx.text({ content: 'If you see this, the component system is working.' })
+          ])
+        ]);
+      }
+    }
+    
+    // Register and mount
+    lynx.registerComponent('simple-app', SimpleApp);
+    
+    window.onload = () => {
+      const app = document.getElementById('app');
+      lynx.mount(app, lynx.element('simple-app'));
+    };
+  </script>
+</body>
+</html>

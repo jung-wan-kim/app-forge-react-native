@@ -43,20 +43,47 @@
   <script src="App.js"></script>
 
   <script>
-    // Lynx 컴포넌트 등록
-    lynx.registerComponent('video-player', VideoPlayer)
-    lynx.registerComponent('video-feed', VideoFeed)
-    lynx.registerComponent('interaction-bar', InteractionBar)
-    lynx.registerComponent('navigation-bar', NavigationBar)
-    lynx.registerComponent('comments-panel', CommentsPanel)
-    lynx.registerComponent('home-page', HomePage)
-    lynx.registerComponent('profile-page', ProfilePage)
-    lynx.registerComponent('upload-page', UploadPage)
-    lynx.registerComponent('app', App)
-
-    // 앱 시작
-    const app = document.getElementById('app')
-    lynx.mount(app, lynx.element('app'))
+    // 디버깅을 위한 에러 캐치
+    window.addEventListener('error', (e) => {
+      console.error('Global error:', e.message, e);
+    });
+    
+    // 컴포넌트 로딩 확인
+    console.log('Component check:', {
+      lynx: typeof lynx !== 'undefined',
+      VideoPlayer: typeof VideoPlayer !== 'undefined',
+      App: typeof App !== 'undefined'
+    });
+    
+    try {
+      // Lynx 컴포넌트 등록
+      lynx.registerComponent('video-player', VideoPlayer);
+      lynx.registerComponent('video-feed', VideoFeed);
+      lynx.registerComponent('interaction-bar', InteractionBar);
+      lynx.registerComponent('navigation-bar', NavigationBar);
+      lynx.registerComponent('comments-panel', CommentsPanel);
+      lynx.registerComponent('home-page', HomePage);
+      lynx.registerComponent('profile-page', ProfilePage);
+      lynx.registerComponent('upload-page', UploadPage);
+      lynx.registerComponent('app', App);
+      
+      console.log('All components registered successfully');
+      
+      // 앱 시작 - DOM이 준비된 후 실행
+      document.addEventListener('DOMContentLoaded', () => {
+        const app = document.getElementById('app');
+        if (app) {
+          console.log('Mounting app...');
+          lynx.mount(app, lynx.element('app'));
+          console.log('App mounted successfully');
+        } else {
+          console.error('App container not found');
+        }
+      });
+      
+    } catch (error) {
+      console.error('Component registration error:', error);
+    }
   </script>
 </body>
 </html>
