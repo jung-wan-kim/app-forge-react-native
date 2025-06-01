@@ -1,33 +1,50 @@
 import React from 'react';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path, Circle, G } from 'react-native-svg';
 
 const ProfileIcon = ({ size = 24, color = '#000', filled = false }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       {filled ? (
-        <>
-          <Circle cx="12" cy="8" r="4" fill={color} />
+        <G>
+          {/* 외곽 원 */}
+          <Circle cx="12" cy="12" r="11" fill={color} fillOpacity="0.1" />
+          {/* 아바타 이미지 영역 */}
+          <Circle cx="12" cy="12" r="9" fill={color} fillOpacity="0.2" />
+          {/* 머리 */}
+          <Circle cx="12" cy="10" r="3.5" fill={color} />
+          {/* 몸통 */}
           <Path
-            d="M12 14c-4 0-7.33 2.67-8 6h16c-.67-3.33-4-6-8-6z"
+            d="M12 15c-3.5 0-6.5 2-7 4.5a9 9 0 0 0 14 0c-.5-2.5-3.5-4.5-7-4.5z"
             fill={color}
           />
-        </>
+        </G>
       ) : (
-        <>
+        <G>
+          {/* 외곽 테두리 */}
           <Circle 
             cx="12" 
-            cy="8" 
+            cy="12" 
+            r="10" 
+            stroke={color} 
+            strokeWidth="1.5"
+            strokeOpacity="0.3"
+          />
+          {/* 머리 */}
+          <Circle 
+            cx="12" 
+            cy="10" 
             r="3" 
             stroke={color} 
-            strokeWidth="2"
+            strokeWidth="1.5"
           />
+          {/* 몸통 */}
           <Path
-            d="M5 20c0-3.87 3.13-7 7-7s7 3.13 7 7"
+            d="M6 20a8.96 8.96 0 0 0 12 0 6 6 0 0 0-12 0z"
             stroke={color}
-            strokeWidth="2"
+            strokeWidth="1.5"
             strokeLinecap="round"
           />
-        </>
+        </G>
       )}
     </Svg>
   );

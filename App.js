@@ -7,7 +7,7 @@ import { StyleSheet, View, Text } from 'react-native';
 // SVG 아이콘 임포트
 import HomeIcon from './src/components/icons/HomeIcon';
 import DiscoverIcon from './src/components/icons/DiscoverIcon';
-import AddIcon from './src/components/icons/AddIcon';
+import UploadButton from './src/components/icons/UploadButton';
 import InboxIcon from './src/components/icons/InboxIcon';
 import ProfileIcon from './src/components/icons/ProfileIcon';
 
@@ -36,36 +36,8 @@ function App() {
               } else if (route.name === 'Search') {
                 return <DiscoverIcon size={28} color={color} />;
               } else if (route.name === 'Upload') {
-                // TikTok 스타일 업로드 버튼
-                return (
-                  <View style={{
-                    width: 45,
-                    height: 30,
-                    borderRadius: 8,
-                    backgroundColor: focused ? '#fff' : 'rgba(255, 255, 255, 0.9)',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                  }}>
-                    <View style={{
-                      position: 'absolute',
-                      left: -4,
-                      width: 20,
-                      height: 30,
-                      borderRadius: 8,
-                      backgroundColor: '#00f2ea',
-                    }} />
-                    <View style={{
-                      position: 'absolute',
-                      right: -4,
-                      width: 20,
-                      height: 30,
-                      borderRadius: 8,
-                      backgroundColor: '#ff0050',
-                    }} />
-                    <AddIcon size={22} color={focused ? '#000' : '#000'} />
-                  </View>
-                );
+                // TikTok 스타일 업로드 버튼 - Rectangle 포함 SVG
+                return <UploadButton size={45} focused={focused} />;
               } else if (route.name === 'Inbox') {
                 return <InboxIcon size={28} color={color} filled={focused} />;
               } else if (route.name === 'Profile') {

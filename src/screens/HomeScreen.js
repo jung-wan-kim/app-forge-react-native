@@ -48,7 +48,6 @@ export default function HomeScreen() {
   const [videos, setVideos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadVideos();
@@ -57,7 +56,6 @@ export default function HomeScreen() {
   const loadVideos = async () => {
     try {
       setLoading(true);
-      setError(null);
       
       const { data, error } = await supabase
         .from('videos')
@@ -74,16 +72,14 @@ export default function HomeScreen() {
 
       if (error) {
         console.error('Error loading videos:', error);
-        setError(error.message);
-        // 오류 발생 시 샘플 데이터 사용
+        // 오류 발생 시 샘플 데이터 사용 (오류 배너 표시하지 않음)
         setVideos(SAMPLE_VIDEOS);
       } else {
         setVideos(data || SAMPLE_VIDEOS);
       }
     } catch (error) {
       console.error('Error loading videos:', error);
-      setError(error.message);
-      // 네트워크 오류 시 샘플 데이터 사용
+      // 네트워크 오류 시 샘플 데이터 사용 (오류 배너 표시하지 않음)
       setVideos(SAMPLE_VIDEOS);
     } finally {
       setLoading(false);
@@ -112,12 +108,6 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       
-      {error && (
-        <View style={styles.errorBanner}>
-          <Text style={styles.errorText}>네트워크 오류 - 샘플 데이터 표시 중</Text>
-        </View>
-      )}
-
       <FlatList
         data={videos}
         renderItem={({ item, index }) => (
@@ -143,20 +133,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000',
-  },
-  errorBanner: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    right: 20,
-    backgroundColor: 'rgba(255,71,87,0.9)',
-    padding: 10,
-    borderRadius: 5,
-    zIndex: 1000,
-  },
-  errorText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: 12,
   },
 });

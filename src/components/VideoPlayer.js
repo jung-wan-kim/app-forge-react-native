@@ -12,6 +12,7 @@ import ActionButton from './ActionButton';
 import HeartIcon from './icons/HeartIcon';
 import CommentIcon from './icons/CommentIcon';
 import ShareIcon from './icons/ShareIcon';
+import AvatarIcon from './icons/AvatarIcon';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -82,9 +83,7 @@ const VideoPlayer = ({ item, isActive }) => {
           <View style={styles.rightSection}>
             {/* 프로필 */}
             <TouchableOpacity style={styles.profileButton}>
-              <View style={styles.profileImage}>
-                <Icon name="person" size={24} color="#fff" />
-              </View>
+              <AvatarIcon size={48} hasImage={false} />
               <View style={styles.addButton}>
                 <Icon name="add" size={16} color="#fff" />
               </View>
@@ -207,16 +206,6 @@ const styles = StyleSheet.create({
   profileButton: {
     marginBottom: 25,
     alignItems: 'center',
-  },
-  profileImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#333',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
   },
   addButton: {
     position: 'absolute',
