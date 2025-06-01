@@ -25,6 +25,17 @@
       width: 100%;
       height: 100%;
     }
+    
+    @keyframes heartFloat {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -150%) scale(1.5);
+      }
+    }
   </style>
   <!-- Lynx Framework -->
   <script src="lib/lynx-core.js"></script>
@@ -40,6 +51,7 @@
   <script src="pages/HomePage.js"></script>
   <script src="pages/ProfilePage.js"></script>
   <script src="pages/UploadPage.js"></script>
+  <script src="pages/SearchPage.js"></script>
   <script src="App.js"></script>
 
   <script>
@@ -65,6 +77,7 @@
       lynx.registerComponent('home-page', HomePage);
       lynx.registerComponent('profile-page', ProfilePage);
       lynx.registerComponent('upload-page', UploadPage);
+      lynx.registerComponent('search-page', SearchPage);
       lynx.registerComponent('app-container', App);
       
       console.log('All components registered successfully');

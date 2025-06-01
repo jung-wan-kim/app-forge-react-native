@@ -23,43 +23,78 @@ class ProfilePage extends LynxComponent {
   }
   
   async loadUserData() {
-    // Mock data for now
+    // Mock data with more realistic content
     this.user = {
       id: this.userId,
-      username: 'testuser',
-      full_name: '테스트 유저',
-      bio: '틱톡 클론 앱 테스트 중입니다 🎵',
+      username: 'k_creator',
+      full_name: '김크리에이터',
+      bio: '일상을 특별하게 ✨\n춤, 요리, 여행 콘텐츠\n협업문의: creator@email.com',
       profile_picture: null,
-      verified: false,
-      website: 'https://example.com'
+      verified: true,
+      website: 'linktr.ee/k_creator'
     }
     
     this.stats = {
       following: 324,
-      followers: 15700,
-      likes: 234500
+      followers: 157000,
+      likes: 2345000
     }
     
+    // 실제 비디오 데이터와 연결
     this.videos = [
       {
         id: '1',
-        thumbnail: 'https://via.placeholder.com/150',
-        views: 12300,
-        created_at: new Date().toISOString()
+        thumbnail: 'https://picsum.photos/200/300?random=1',
+        views: 125400,
+        likes: 12540,
+        created_at: new Date().toISOString(),
+        description: '새로운 댄스 챌린지!'
       },
       {
         id: '2',
-        thumbnail: 'https://via.placeholder.com/150',
-        views: 45600,
-        created_at: new Date(Date.now() - 86400000).toISOString()
+        thumbnail: 'https://picsum.photos/200/300?random=2',
+        views: 89234,
+        likes: 8923,
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+        description: '오늘의 맛집 발견!'
       },
       {
         id: '3',
-        thumbnail: 'https://via.placeholder.com/150',
-        views: 7890,
-        created_at: new Date(Date.now() - 172800000).toISOString()
+        thumbnail: 'https://picsum.photos/200/300?random=3',
+        views: 234567,
+        likes: 23456,
+        created_at: new Date(Date.now() - 172800000).toISOString(),
+        description: 'ㅋㅋㅋㅋ 이거 보고 안 웃으면 인정'
+      },
+      {
+        id: '4',
+        thumbnail: 'https://picsum.photos/200/300?random=4',
+        views: 45678,
+        likes: 4567,
+        created_at: new Date(Date.now() - 259200000).toISOString(),
+        description: '제주도 여행 브이로그'
+      },
+      {
+        id: '5',
+        thumbnail: 'https://picsum.photos/200/300?random=5',
+        views: 156789,
+        likes: 15678,
+        created_at: new Date(Date.now() - 345600000).toISOString(),
+        description: '우리집 강아지가 너무 귀여워요'
+      },
+      {
+        id: '6',
+        thumbnail: 'https://picsum.photos/200/300?random=6',
+        views: 67890,
+        likes: 6789,
+        created_at: new Date(Date.now() - 432000000).toISOString(),
+        description: '요리 레시피 공개!'
       }
     ]
+    
+    // 좋아요한 비디오 목록
+    const likedVideos = JSON.parse(localStorage.getItem('likedVideos') || '[]');
+    this.likedVideosList = this.videos.filter(v => likedVideos.includes(v.id));
     
     this.render()
   }
@@ -230,14 +265,14 @@ class ProfilePage extends LynxComponent {
         ]),
         
         // Bio
-        this.user.bio && lynx.text({
-          content: this.user.bio,
+        this.user.bio && lynx.div({
           style: {
             fontSize: '14px',
             lineHeight: '1.4',
-            marginBottom: '8px'
+            marginBottom: '8px',
+            whiteSpace: 'pre-wrap'
           }
-        }),
+        }, [lynx.text({ content: this.user.bio })]),
         
         // Website
         this.user.website && lynx.text({
@@ -276,6 +311,8 @@ class ProfilePage extends LynxComponent {
       }, 
         this.activeTab === 'videos' ? 
           this.videos.map(video => this.renderVideoThumbnail(video)) :
+        this.activeTab === 'liked' && this.likedVideosList && this.likedVideosList.length > 0 ?
+          this.likedVideosList.map(video => this.renderVideoThumbnail(video)) :
           [lynx.div({
             style: {
               gridColumn: '1 / -1',
@@ -346,7 +383,10 @@ class ProfilePage extends LynxComponent {
         position: 'relative',
         paddingBottom: '133.33%',
         backgroundColor: '#ddd',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        backgroundImage: `url(${video.thumbnail})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
       }
     }, [
       lynx.div({

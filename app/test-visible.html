@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visibility Test</title>
+  <style>
+    body { margin: 0; padding: 20px; background: #f0f0f0; }
+    .test-box { 
+      background: white; 
+      padding: 20px; 
+      margin: 10px 0; 
+      border: 2px solid #333;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Component Visibility Test</h1>
+  
+  <div class="test-box">
+    <h3>1. Basic HTML Test</h3>
+    <div style="background: #fe2c55; color: white; padding: 20px;">
+      If you see this red box, basic HTML works! 
+    </div>
+  </div>
+  
+  <div class="test-box">
+    <h3>2. Simple Lynx Component</h3>
+    <div id="simple-test"></div>
+  </div>
+  
+  <div class="test-box">
+    <h3>3. Full App Component</h3>
+    <div id="app-test" style="min-height: 200px; border: 1px solid #ccc;"></div>
+  </div>
+  
+  <script src="lib/lynx-core.js"></script>
+  <script>
+    // Test 1: Simple component
+    class SimpleTest {
+      render() {
+        return lynx.div({
+          style: { 
+            background: '#00f', 
+            color: 'white', 
+            padding: '20px' 
+          }
+        }, [
+          lynx.text({ content: 'If you see this blue box, Lynx works!' })
+        ]);
+      }
+    }
+    
+    lynx.registerComponent('simple-test', SimpleTest);
+    lynx.mount(document.getElementById('simple-test'), lynx.element('simple-test'));
+  </script>
+  
+  <!-- Load all components -->
+  <script src="components/VideoPlayer.js"></script>
+  <script src="components/VideoFeed.js"></script>
+  <script src="components/InteractionBar.js"></script>
+  <script src="components/NavigationBar.js"></script>
+  <script src="components/CommentsPanel.js"></script>
+  <script src="pages/HomePage.js"></script>
+  <script src="pages/ProfilePage.js"></script>
+  <script src="pages/UploadPage.js"></script>
+  <script src="App.js"></script>
+  
+  <script>
+    // Test 2: Full app
+    try {
+      lynx.registerComponent('video-player', VideoPlayer);
+      lynx.registerComponent('video-feed', VideoFeed);
+      lynx.registerComponent('interaction-bar', InteractionBar);
+      lynx.registerComponent('navigation-bar', NavigationBar);
+      lynx.registerComponent('comments-panel', CommentsPanel);
+      lynx.registerComponent('home-page', HomePage);
+      lynx.registerComponent('profile-page', ProfilePage);
+      lynx.registerComponent('upload-page', UploadPage);
+      lynx.registerComponent('app-container', App);
+      
+      lynx.mount(document.getElementById('app-test'), lynx.element('app-container'));
+      
+      console.log('✅ Full app mounted in test box');
+    } catch (e) {
+      console.error('❌ Error mounting app:', e);
+      document.getElementById('app-test').innerHTML = `<p style="color: red;">Error: ${e.message}</p>`;
+    }
+  </script>
+</body>
+</html>

@@ -104,29 +104,71 @@ class VideoFeed extends LynxComponent {
       {
         id: '1',
         url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-        username: '@testuser1',
-        description: '첫 번째 테스트 비디오입니다 #틱톡클론 #테스트',
-        likes_count: 1234,
-        comments_count: 56,
-        shares: 12,
+        username: '@dancing_queen',
+        description: '새로운 댄스 챌린지! 같이 해요 💃 #댄스챌린지 #틱톡댄스 #춤스타그램',
+        likes_count: 125400,
+        comments_count: 3421,
+        shares: 892,
         user: {
-          username: 'testuser1',
+          username: 'dancing_queen',
           profile_picture: null,
-          verified: false
+          verified: true
         }
       },
       {
         id: '2',
         url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_2mb.mp4',
-        username: '@testuser2',
-        description: '두 번째 테스트 비디오입니다 #개발중',
-        likes_count: 5678,
-        comments_count: 123,
-        shares: 45,
+        username: '@foodie_paradise',
+        description: '오늘의 맛집 발견! 이거 진짜 맛있어요 🍕🍔 #맛집 #먹스타그램 #푸드',
+        likes_count: 89234,
+        comments_count: 1523,
+        shares: 456,
         user: {
-          username: 'testuser2',
+          username: 'foodie_paradise',
+          profile_picture: null,
+          verified: false
+        }
+      },
+      {
+        id: '3',
+        url: 'https://sample-videos.com/video321/mp4/480/big_buck_bunny_480p_1mb.mp4',
+        username: '@comedy_king',
+        description: 'ㅋㅋㅋㅋ 이거 보고 안 웃으면 인정 😂 #코미디 #웃긴영상 #개그',
+        likes_count: 234567,
+        comments_count: 8901,
+        shares: 2341,
+        user: {
+          username: 'comedy_king',
           profile_picture: null,
           verified: true
+        }
+      },
+      {
+        id: '4',
+        url: 'https://sample-videos.com/video321/mp4/360/big_buck_bunny_360p_1mb.mp4',
+        username: '@travel_diary',
+        description: '제주도 여행 브이로그 🌴 숨은 명소 추천! #여행 #제주도 #브이로그',
+        likes_count: 45678,
+        comments_count: 892,
+        shares: 234,
+        user: {
+          username: 'travel_diary',
+          profile_picture: null,
+          verified: false
+        }
+      },
+      {
+        id: '5',
+        url: 'https://sample-videos.com/video321/mp4/240/big_buck_bunny_240p_1mb.mp4',
+        username: '@pet_lover',
+        description: '우리집 강아지가 너무 귀여워요 🐶❤️ #펫스타그램 #강아지 #반려동물',
+        likes_count: 156789,
+        comments_count: 4532,
+        shares: 1234,
+        user: {
+          username: 'pet_lover',
+          profile_picture: null,
+          verified: false
         }
       }
     ]

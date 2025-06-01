@@ -19,6 +19,31 @@ class InteractionBar extends LynxComponent {
     this.isFollowing = false
     this.user = null
     this.currentUserId = 'test-user-1'
+    
+    // 로컬 스토리지에서 좋아요 상태 복원
+    this.loadLikeState();
+  }
+  
+  loadLikeState() {
+    if (this.videoId) {
+      const likedVideos = JSON.parse(localStorage.getItem('likedVideos') || '[]');
+      this.isLiked = likedVideos.includes(this.videoId);
+    }
+  }
+  
+  saveLikeState() {
+    const likedVideos = JSON.parse(localStorage.getItem('likedVideos') || '[]');
+    if (this.isLiked) {
+      if (!likedVideos.includes(this.videoId)) {
+        likedVideos.push(this.videoId);
+      }
+    } else {
+      const index = likedVideos.indexOf(this.videoId);
+      if (index > -1) {
+        likedVideos.splice(index, 1);
+      }
+    }
+    localStorage.setItem('likedVideos', JSON.stringify(likedVideos));
   }
 
   formatNumber(num) {
@@ -36,11 +61,37 @@ class InteractionBar extends LynxComponent {
     
     this.isLiked = !this.isLiked
     this.likes += this.isLiked ? 1 : -1
+    this.saveLikeState();
     this.render()
     
-    // Mock API call - just update local state
-    // In production, this would call the actual API
+    // 애니메이션 효과
+    if (this.isLiked) {
+      this.showLikeAnimation();
+    }
+    
     console.log('Like toggled for video:', this.videoId);
+  }
+  
+  showLikeAnimation() {
+    // 하트 애니메이션을 표시
+    const heart = document.createElement('div');
+    heart.innerHTML = '❤️';
+    heart.style.cssText = `
+      position: fixed;
+      font-size: 60px;
+      z-index: 9999;
+      pointer-events: none;
+      animation: heartFloat 1s ease-out forwards;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    `;
+    
+    document.body.appendChild(heart);
+    
+    setTimeout(() => {
+      heart.remove();
+    }, 1000);
   }
 
   toggleFollow() {

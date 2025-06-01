@@ -26,6 +26,9 @@ class App extends LynxComponent {
       case 'create':
         pageContent = lynx.element('upload-page')
         break
+      case 'discover':
+        pageContent = lynx.element('search-page')
+        break
       case 'home':
       default:
         pageContent = lynx.element('home-page')
