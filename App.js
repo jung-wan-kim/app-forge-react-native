@@ -11,7 +11,6 @@ import SearchScreen from './src/screens/SearchScreen';
 import UploadScreen from './src/screens/UploadScreen';
 import InboxScreen from './src/screens/InboxScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
-import AdminScreen from './src/screens/AdminScreen';
 
 // Supabase 설정
 import './src/config/supabase';
@@ -27,47 +26,58 @@ function App() {
             tabBarIcon: ({ focused, color, size }) => {
               let iconName;
 
+              // Figma 기준 아이콘 매핑
               if (route.name === 'Home') {
-                iconName = 'home';
+                // Figma: home 아이콘
+                return (
+                  <View style={{ alignItems: 'center' }}>
+                    <Icon name={focused ? 'home' : 'home'} size={28} color={color} />
+                  </View>
+                );
               } else if (route.name === 'Search') {
-                iconName = 'search';
+                iconName = focused ? 'search' : 'search';
+                return <Icon name={iconName} size={28} color={color} />;
               } else if (route.name === 'Upload') {
+                // TikTok 스타일 업로드 버튼
                 return (
                   <View style={{
-                    width: 60,
-                    height: 34,
+                    width: 45,
+                    height: 30,
                     borderRadius: 8,
-                    backgroundColor: '#fff',
+                    backgroundColor: focused ? '#fff' : 'rgba(255, 255, 255, 0.9)',
                     justifyContent: 'center',
                     alignItems: 'center',
                     flexDirection: 'row',
                   }}>
                     <View style={{
                       position: 'absolute',
-                      left: -2,
-                      width: 24,
-                      height: 34,
+                      left: -4,
+                      width: 20,
+                      height: 30,
                       borderRadius: 8,
                       backgroundColor: '#00f2ea',
                     }} />
                     <View style={{
                       position: 'absolute',
-                      right: -2,
-                      width: 24,
-                      height: 34,
+                      right: -4,
+                      width: 20,
+                      height: 30,
                       borderRadius: 8,
                       backgroundColor: '#ff0050',
                     }} />
-                    <Icon name="add" size={24} color="#000" />
+                    <Icon name="add" size={22} color={focused ? '#000' : '#000'} />
                   </View>
                 );
               } else if (route.name === 'Inbox') {
-                iconName = 'inbox';
+                iconName = focused ? 'mail' : 'mail-outline';
+                return <Icon name={iconName} size={28} color={color} />;
               } else if (route.name === 'Profile') {
-                iconName = 'person';
+                iconName = focused ? 'person' : 'person-outline';
+                return <Icon name={iconName} size={28} color={color} />;
               }
 
-              return <Icon name={iconName} size={size} color={color} />;
+              // 기본 반환값 (사용되지 않음)
+              return null;
             },
             tabBarActiveTintColor: '#fff',
             tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.6)',
@@ -83,6 +93,7 @@ function App() {
             tabBarLabelStyle: {
               fontSize: 10,
               marginTop: -5,
+              fontWeight: '500',
             },
             headerShown: false,
           })}
@@ -98,7 +109,7 @@ function App() {
             name="Search" 
             component={SearchScreen}
             options={{
-              tabBarLabel: '친구',
+              tabBarLabel: '디스커버',
             }}
           />
           <Tab.Screen 
@@ -112,23 +123,14 @@ function App() {
             name="Inbox" 
             component={InboxScreen}
             options={{
-              tabBarLabel: '받은 편지함',
+              tabBarLabel: '받은편지함',
             }}
           />
           <Tab.Screen 
             name="Profile" 
             component={ProfileScreen}
             options={{
-              tabBarLabel: '프로필',
-            }}
-          />
-          <Tab.Screen 
-            name="Admin" 
-            component={AdminScreen}
-            options={{
-              tabBarIcon: ({ focused, color, size }) => (
-                <Icon name="settings" size={size} color={color} />
-              ),
+              tabBarLabel: '나',
             }}
           />
         </Tab.Navigator>
