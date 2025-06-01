@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Forge - Figma 컴포넌트 데모</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .demo-title {
+            color: #333;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+        
+        .figma-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .component-section {
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .component-demo {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .component-demo h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .component-demo p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .component-preview {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        .controls h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .control-item label {
+            font-size: 0.9rem;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .control-item input, .control-item select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .figma-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .figma-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Generated component styles will be injected here */
+        .lynx-component {
+            font-family: inherit;
+        }
+        
+        /* Button specific styles matching Figma design */
+        .appforgebutton {
+            width: 120px !important;
+            height: 40px !important;
+            background-color: rgba(51, 102, 230, 1) !important;
+            border-radius: 8px !important;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1) !important;
+            color: white !important;
+            border: none !important;
+            font-weight: 500 !important;
+            font-size: 14px !important;
+        }
+        
+        /* Input specific styles matching Figma design */
+        .appforgeinput {
+            width: 200px !important;
+            height: 40px !important;
+            background-color: rgba(255, 255, 255, 1) !important;
+            border: 1px solid rgba(204, 204, 204, 1) !important;
+            border-radius: 4px !important;
+            padding: 0 12px !important;
+            font-size: 14px !important;
+        }
+        
+        .appforgeinput input {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+            outline: none !important;
+            background: transparent !important;
+            font-size: 14px !important;
+        }
+        
+        /* Card specific styles matching Figma design */
+        .appforgecard {
+            width: 280px !important;
+            height: 160px !important;
+            background-color: rgba(255, 255, 255, 1) !important;
+            border-radius: 12px !important;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08) !important;
+            padding: 20px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+        }
+        
+        .appforgecard h3 {
+            color: #333 !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+        }
+        
+        .appforgecard p {
+            color: #666 !important;
+            font-size: 14px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1 class="demo-title">🎨 App Forge</h1>
+            <p class="demo-subtitle">Figma xji8bzh5에서 자동 생성된 Lynx 컴포넌트 데모</p>
+        </div>
+        
+        <div class="figma-info">
+            <strong>📋 Figma 채널 설정:</strong><br>
+            • 페이지: Design System<br>
+            • 프리픽스: AppForge<br>
+            • 제외 패턴: Draft, WIP<br>
+            • <a href="https://www.figma.com/file/xji8bzh5" class="figma-link" target="_blank">Figma 파일 보기</a>
+        </div>
+        
+        <div class="controls">
+            <h3>🎮 컴포넌트 테스트 컨트롤</h3>
+            <div class="control-group">
+                <div class="control-item">
+                    <label>버튼 텍스트</label>
+                    <input type="text" id="buttonText" value="Click Me!" placeholder="버튼 텍스트 입력">
+                </div>
+                <div class="control-item">
+                    <label>카드 제목</label>
+                    <input type="text" id="cardTitle" value="Dynamic Title" placeholder="카드 제목 입력">
+                </div>
+                <div class="control-item">
+                    <label>카드 설명</label>
+                    <input type="text" id="cardSubtitle" value="This content updates in real-time" placeholder="카드 설명 입력">
+                </div>
+                <div class="control-item">
+                    <label>입력 플레이스홀더</label>
+                    <input type="text" id="inputPlaceholder" value="Type something..." placeholder="플레이스홀더 입력">
+                </div>
+            </div>
+            <button onclick="updateComponents()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">컴포넌트 업데이트</button>
+        </div>
+        
+        <div class="component-section">
+            <h2 class="section-title">
+                🧩 생성된 Lynx 컴포넌트
+            </h2>
+            
+            <div class="component-grid">
+                <div class="component-demo">
+                    <h4>AppForge Button</h4>
+                    <p>Figma 디자인 기반 버튼 컴포넌트 (120x40px, 파란색, 둥근 모서리)</p>
+                    <div class="component-preview" id="button-preview">
+                        <!-- Button component will be rendered here -->
+                    </div>
+                    <small>Figma URL: <a href="https://www.figma.com/file/xji8bzh5?node-id=1:2" class="figma-link" target="_blank">1:2</a></small>
+                </div>
+                
+                <div class="component-demo">
+                    <h4>AppForge Input</h4>
+                    <p>폼용 입력 필드 컴포넌트 (200x40px, 흰색 배경, 회색 테두리)</p>
+                    <div class="component-preview" id="input-preview">
+                        <!-- Input component will be rendered here -->
+                    </div>
+                    <small>Figma URL: <a href="https://www.figma.com/file/xji8bzh5?node-id=1:3" class="figma-link" target="_blank">1:3</a></small>
+                </div>
+                
+                <div class="component-demo">
+                    <h4>AppForge Card</h4>
+                    <p>콘텐츠용 카드 컨테이너 (280x160px, 그림자 효과, 둥근 모서리)</p>
+                    <div class="component-preview" id="card-preview">
+                        <!-- Card component will be rendered here -->
+                    </div>
+                    <small>Figma URL: <a href="https://www.figma.com/file/xji8bzh5?node-id=1:4" class="figma-link" target="_blank">1:4</a></small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="componentCount">3</div>
+                <div class="stat-label">생성된 컴포넌트</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">Design System</div>
+                <div class="stat-label">활성 Figma 페이지</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">xji8bzh5</div>
+                <div class="stat-label">Figma 파일 ID</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lastSync">방금 전</div>
+                <div class="stat-label">마지막 동기화</div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Import generated components
+        import { AppForgeButton, AppForgeInput, AppForgeCard } from './components/index.js';
+        
+        // Component instances
+        let buttonComponent, inputComponent, cardComponent;
+        
+        // Initialize components
+        function initComponents() {
+            // Button
+            buttonComponent = new AppForgeButton({
+                text: 'Click Me!',
+                onClick: () => {
+                    alert('AppForge Button clicked! 🎉');
+                    incrementClickCount();
+                }
+            });
+            
+            // Input
+            inputComponent = new AppForgeInput({
+                placeholder: 'Type something...',
+                type: 'text'
+            });
+            
+            // Card  
+            cardComponent = new AppForgeCard({
+                title: 'Dynamic Title',
+                subtitle: 'This content updates in real-time'
+            });
+            
+            // Render components
+            const buttonPreview = document.getElementById('button-preview');
+            const inputPreview = document.getElementById('input-preview');
+            const cardPreview = document.getElementById('card-preview');
+            
+            buttonPreview.appendChild(buttonComponent.render());
+            
+            // For input, create a proper input element
+            const inputElement = document.createElement('input');
+            inputElement.type = 'text';
+            inputElement.placeholder = 'Type something...';
+            inputElement.className = 'lynx-component appforgeinput';
+            inputPreview.appendChild(inputElement);
+            
+            cardPreview.appendChild(cardComponent.render());
+            
+            console.log('✅ 모든 컴포넌트가 초기화되었습니다.');
+        }
+        
+        // Update components with new data
+        window.updateComponents = function() {
+            const buttonText = document.getElementById('buttonText').value;
+            const cardTitle = document.getElementById('cardTitle').value;
+            const cardSubtitle = document.getElementById('cardSubtitle').value;
+            const inputPlaceholder = document.getElementById('inputPlaceholder').value;
+            
+            // Update button
+            if (buttonComponent) {
+                buttonComponent.setData({ text: buttonText });
+            }
+            
+            // Update card
+            if (cardComponent) {
+                cardComponent.setData({ 
+                    title: cardTitle, 
+                    subtitle: cardSubtitle 
+                });
+            }
+            
+            // Update input placeholder
+            const inputElement = document.querySelector('#input-preview input');
+            if (inputElement) {
+                inputElement.placeholder = inputPlaceholder;
+            }
+            
+            console.log('🔄 컴포넌트가 업데이트되었습니다.');
+        };
+        
+        let clickCount = 0;
+        function incrementClickCount() {
+            clickCount++;
+            // Update some stats for demo
+            const stats = document.querySelectorAll('.stat-value');
+            if (stats[0]) {
+                stats[0].textContent = `${3} (+${clickCount})`;
+            }
+        }
+        
+        // Auto-update last sync time
+        function updateSyncTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ko-KR');
+            const lastSyncEl = document.getElementById('lastSync');
+            if (lastSyncEl) {
+                lastSyncEl.textContent = timeString;
+            }
+        }
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            initComponents();
+            updateSyncTime();
+            
+            // Update sync time every 30 seconds
+            setInterval(updateSyncTime, 30000);
+        });
+        
+        // Expose to global scope for debugging
+        window.components = {
+            button: () => buttonComponent,
+            input: () => inputComponent, 
+            card: () => cardComponent
+        };
+        
+        console.log('🚀 App Forge 데모가 시작되었습니다!');
+        console.log('💡 window.components 객체로 컴포넌트에 접근할 수 있습니다.');
+    </script>
+</body>
+</html>
