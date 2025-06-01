@@ -75,3 +75,4 @@
 {"level":"info","message":"Navigating to URL","service":"mcp-puppeteer","timestamp":"2025-06-01 23:36:19.467","url":"http://localhost:8080/"}
 {"level":"info","message":"Navigation successful","service":"mcp-puppeteer","status":200,"timestamp":"2025-06-01 23:36:19.998","url":"http://localhost:8080/"}
 {"arguments":{"height":812,"name":"homepage-final","width":375},"level":"debug","message":"Tool call received","service":"mcp-puppeteer","timestamp":"2025-06-01 23:36:30.770","tool":"puppeteer_screenshot"}
+{"level":"info","message":"Puppeteer MCP Server closing","service":"mcp-puppeteer","timestamp":"2025-06-01 23:59:54.467"}
