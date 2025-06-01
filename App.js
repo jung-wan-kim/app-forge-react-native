@@ -32,7 +32,35 @@ function App() {
               } else if (route.name === 'Search') {
                 iconName = 'search';
               } else if (route.name === 'Upload') {
-                iconName = 'add-box';
+                return (
+                  <View style={{
+                    width: 60,
+                    height: 34,
+                    borderRadius: 8,
+                    backgroundColor: '#fff',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                  }}>
+                    <View style={{
+                      position: 'absolute',
+                      left: -2,
+                      width: 24,
+                      height: 34,
+                      borderRadius: 8,
+                      backgroundColor: '#00f2ea',
+                    }} />
+                    <View style={{
+                      position: 'absolute',
+                      right: -2,
+                      width: 24,
+                      height: 34,
+                      borderRadius: 8,
+                      backgroundColor: '#ff0050',
+                    }} />
+                    <Icon name="add" size={24} color="#000" />
+                  </View>
+                );
               } else if (route.name === 'Inbox') {
                 iconName = 'inbox';
               } else if (route.name === 'Profile') {
@@ -42,19 +70,58 @@ function App() {
               return <Icon name={iconName} size={size} color={color} />;
             },
             tabBarActiveTintColor: '#fff',
-            tabBarInactiveTintColor: '#8e8e93',
+            tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.6)',
             tabBarStyle: {
-              backgroundColor: '#000',
+              backgroundColor: 'rgba(0, 0, 0, 0.9)',
               borderTopWidth: 0,
+              position: 'absolute',
+              elevation: 0,
+              height: 80,
+              paddingBottom: 25,
+              paddingTop: 10,
+            },
+            tabBarLabelStyle: {
+              fontSize: 10,
+              marginTop: -5,
             },
             headerShown: false,
           })}
         >
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Search" component={SearchScreen} />
-          <Tab.Screen name="Upload" component={UploadScreen} />
-          <Tab.Screen name="Inbox" component={InboxScreen} />
-          <Tab.Screen name="Profile" component={ProfileScreen} />
+          <Tab.Screen 
+            name="Home" 
+            component={HomeScreen}
+            options={{
+              tabBarLabel: '홈',
+            }}
+          />
+          <Tab.Screen 
+            name="Search" 
+            component={SearchScreen}
+            options={{
+              tabBarLabel: '친구',
+            }}
+          />
+          <Tab.Screen 
+            name="Upload" 
+            component={UploadScreen}
+            options={{
+              tabBarLabel: '',
+            }}
+          />
+          <Tab.Screen 
+            name="Inbox" 
+            component={InboxScreen}
+            options={{
+              tabBarLabel: '받은 편지함',
+            }}
+          />
+          <Tab.Screen 
+            name="Profile" 
+            component={ProfileScreen}
+            options={{
+              tabBarLabel: '프로필',
+            }}
+          />
           <Tab.Screen 
             name="Admin" 
             component={AdminScreen}

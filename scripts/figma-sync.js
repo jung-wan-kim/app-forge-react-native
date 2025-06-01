@@ -45,9 +45,11 @@ class FigmaSync {
     async getFigmaFileInfo() {
         // 데모 모드 체크 (토큰이 없거나 데모 파일 ID인 경우)
         if (!this.figmaToken || this.figmaToken === 'your_figma_personal_access_token' || 
-            this.fileId === 'xji8bzh5') {
+            this.figmaToken === 'demo' ||
+            this.fileId === 'xji8bzh5' || 
+            this.fileId === 'aopzqj84') {
             console.log('🎭 데모 모드: 모의 Figma 데이터 사용');
-            const mockData = require('./demo-figma-data.js');
+            const mockData = require('./tiktok-figma-data.js');
             return mockData;
         }
         
@@ -64,7 +66,7 @@ class FigmaSync {
         } catch (error) {
             console.error('❌ Figma API 호출 실패:', error.message);
             console.log('🎭 폴백: 데모 데이터로 전환합니다.');
-            const mockData = require('./demo-figma-data.js');
+            const mockData = require('./tiktok-figma-data.js');
             return mockData;
         }
     }

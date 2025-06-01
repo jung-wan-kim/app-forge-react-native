@@ -6,12 +6,10 @@ import {
   Dimensions,
   StatusBar,
   Text,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import Video from 'react-native-video';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { supabase } from '../config/supabase';
+import VideoPlayer from '../components/VideoPlayer';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -20,108 +18,31 @@ const SAMPLE_VIDEOS = [
   {
     id: '1',
     video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    description: '샘플 비디오 1',
+    description: '멋진 댄스 챌린지! 함께 추어요 💃 #댄스 #챌린지 #트렌드 #fyp',
     user: {
-      username: 'testuser1',
+      username: 'dancer_kim',
       profile_picture: null,
     },
-    likes_count: 100,
-    comments_count: 20,
-    shares_count: 5,
+    likes_count: 12500,
+    comments_count: 230,
+    shares_count: 145,
+    music: '♬ Original Sound - dancer_kim',
   },
   {
     id: '2',
     video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    description: '샘플 비디오 2',
+    description: '오늘의 요리 🍳 초간단 파스타 레시피 #요리 #레시피 #파스타 #먹방',
     user: {
-      username: 'testuser2',
+      username: 'cook_lee',
       profile_picture: null,
     },
-    likes_count: 200,
-    comments_count: 30,
-    shares_count: 10,
+    likes_count: 8700,
+    comments_count: 156,
+    shares_count: 89,
+    music: '♬ Cooking Time - BGM President',
   },
 ];
 
-const VideoItem = ({ item, isActive }) => {
-  const [paused, setPaused] = useState(!isActive);
-  const [liked, setLiked] = useState(false);
-
-  useEffect(() => {
-    setPaused(!isActive);
-  }, [isActive]);
-
-  const handleLike = () => {
-    setLiked(!liked);
-    // TODO: Supabase에 좋아요 저장
-  };
-
-  return (
-    <View style={styles.videoContainer}>
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => setPaused(!paused)}
-        style={StyleSheet.absoluteFillObject}
-      >
-        <Video
-          source={{ uri: item.video_url }}
-          style={styles.video}
-          paused={paused}
-          repeat
-          resizeMode="cover"
-        />
-      </TouchableOpacity>
-
-      {/* 비디오 정보 */}
-      <View style={styles.overlay}>
-        <View style={styles.bottomSection}>
-          <View style={styles.leftSection}>
-            <Text style={styles.username}>@{item.user?.username || 'unknown'}</Text>
-            <Text style={styles.description}>{item.description}</Text>
-          </View>
-
-          <View style={styles.rightSection}>
-            {/* 프로필 */}
-            <TouchableOpacity style={styles.profileButton}>
-              <View style={styles.profileImage}>
-                <Icon name="person" size={20} color="#fff" />
-              </View>
-            </TouchableOpacity>
-
-            {/* 좋아요 */}
-            <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
-              <Icon
-                name={liked ? "favorite" : "favorite-border"}
-                size={30}
-                color={liked ? "#ff4757" : "#fff"}
-              />
-              <Text style={styles.actionText}>{item.likes_count || 0}</Text>
-            </TouchableOpacity>
-
-            {/* 댓글 */}
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="chat-bubble-outline" size={30} color="#fff" />
-              <Text style={styles.actionText}>{item.comments_count || 0}</Text>
-            </TouchableOpacity>
-
-            {/* 공유 */}
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="share" size={30} color="#fff" />
-              <Text style={styles.actionText}>{item.shares_count || 0}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      {/* 일시정지 아이콘 */}
-      {paused && (
-        <View style={styles.pauseIcon}>
-          <Icon name="play-arrow" size={80} color="rgba(255,255,255,0.8)" />
-        </View>
-      )}
-    </View>
-  );
-};
 
 export default function HomeScreen() {
   const [videos, setVideos] = useState([]);
@@ -200,7 +121,7 @@ export default function HomeScreen() {
       <FlatList
         data={videos}
         renderItem={({ item, index }) => (
-          <VideoItem item={item} isActive={index === currentIndex} />
+          <VideoPlayer item={item} isActive={index === currentIndex} />
         )}
         keyExtractor={(item) => item.id}
         pagingEnabled
@@ -222,83 +143,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000',
-  },
-  videoContainer: {
-    height: SCREEN_HEIGHT,
-    justifyContent: 'center',
-  },
-  video: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  bottomSection: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    paddingBottom: 80,
-  },
-  leftSection: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  rightSection: {
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  username: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  description: {
-    color: '#fff',
-    fontSize: 14,
-    marginBottom: 10,
-  },
-  profileButton: {
-    marginBottom: 25,
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#333',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  actionButton: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  actionText: {
-    color: '#fff',
-    fontSize: 12,
-    marginTop: 5,
-  },
-  pauseIcon: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   errorBanner: {
     position: 'absolute',
