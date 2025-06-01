@@ -4,25 +4,42 @@ export const uploadApi = {
   // 동영상 업로드
   async uploadVideo(file, userId) {
     try {
+      console.log('Starting video upload:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        userId: userId
+      });
+
       // 파일명 생성 (timestamp + random)
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `videos/${fileName}`;
+
+      console.log('Uploading to path:', filePath);
 
       // Supabase Storage에 업로드
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('videos')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: file.type
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error details:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Upload successful:', uploadData);
 
       // 공개 URL 가져오기
       const { data: { publicUrl } } = supabase.storage
         .from('videos')
         .getPublicUrl(filePath);
+
+      console.log('Public URL:', publicUrl);
 
       return { 
         path: filePath, 
