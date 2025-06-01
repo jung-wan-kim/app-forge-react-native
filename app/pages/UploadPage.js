@@ -9,6 +9,7 @@ class UploadPage extends LynxComponent {
     this.allowComments = true
     this.allowDuet = true
     this.isUploading = false
+    this.uploadProgress = 0
   }
   
   handleFileSelect(event) {
@@ -58,29 +59,118 @@ class UploadPage extends LynxComponent {
     this.render()
     
     try {
-      // Mock upload process
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Supabase에 비디오 업로드
+      const uploadData = await this.uploadToSupabase()
       
-      alert('비디오가 성공적으로 업로드되었습니다!')
-      
-      // Reset form
-      this.selectedFile = null
-      this.videoPreviewUrl = null
-      this.description = ''
-      this.hashtags = []
-      this.privacy = 'public'
-      this.allowComments = true
-      this.allowDuet = true
-      
-      // Navigate back to home
-      window.dispatchEvent(new CustomEvent('navigation', { detail: { tab: 'home' } }))
+      if (uploadData) {
+        alert('비디오가 성공적으로 업로드되었습니다!')
+        
+        // Reset form
+        this.selectedFile = null
+        this.videoPreviewUrl = null
+        this.description = ''
+        this.hashtags = []
+        this.privacy = 'public'
+        this.allowComments = true
+        this.allowDuet = true
+        
+        // Navigate back to home
+        window.dispatchEvent(new CustomEvent('navigation', { detail: { tab: 'home' } }))
+      }
     } catch (error) {
       console.error('Upload error:', error)
-      alert('업로드 중 오류가 발생했습니다')
+      alert('업로드 중 오류가 발생했습니다: ' + error.message)
     } finally {
       this.isUploading = false
+      this.uploadProgress = 0
       this.render()
     }
+  }
+  
+  async uploadToSupabase() {
+    // 동적으로 모듈 로드
+    const script = document.createElement('script')
+    script.type = 'module'
+    script.textContent = `
+      import { uploadApi } from '/src/api/upload.js';
+      
+      const file = window.__uploadFile;
+      const userId = 'test-user-1'; // 실제로는 로그인한 사용자 ID 사용
+      
+      try {
+        // 진행 상태 업데이트
+        window.dispatchEvent(new CustomEvent('upload-progress', { detail: 30 }));
+        
+        // 1. 비디오 파일 업로드
+        const { url: videoUrl } = await uploadApi.uploadVideo(file, userId);
+        
+        window.dispatchEvent(new CustomEvent('upload-progress', { detail: 80 }));
+        
+        // 2. 비디오 정보 DB에 저장
+        const videoData = {
+          userId: userId,
+          videoUrl: videoUrl,
+          description: window.__uploadDescription,
+          hashtags: window.__uploadHashtags,
+          isPrivate: window.__uploadPrivacy === 'private',
+          allowComments: window.__uploadAllowComments,
+          allowDuet: window.__uploadAllowDuet
+        };
+        
+        const result = await uploadApi.createVideoPost(videoData);
+        window.dispatchEvent(new CustomEvent('upload-progress', { detail: 100 }));
+        window.dispatchEvent(new CustomEvent('upload-complete', { detail: result }));
+      } catch (error) {
+        window.dispatchEvent(new CustomEvent('upload-error', { detail: error }));
+      }
+    `;
+    
+    // 전역 변수로 데이터 전달
+    window.__uploadFile = this.selectedFile;
+    window.__uploadDescription = this.description;
+    window.__uploadHashtags = this.hashtags;
+    window.__uploadPrivacy = this.privacy;
+    window.__uploadAllowComments = this.allowComments;
+    window.__uploadAllowDuet = this.allowDuet;
+    
+    document.head.appendChild(script);
+    
+    return new Promise((resolve, reject) => {
+      // Progress listener
+      const progressHandler = (e) => {
+        this.uploadProgress = e.detail;
+        this.render();
+      };
+      window.addEventListener('upload-progress', progressHandler);
+      
+      window.addEventListener('upload-complete', (e) => {
+        // Clean up
+        window.removeEventListener('upload-progress', progressHandler);
+        delete window.__uploadFile;
+        delete window.__uploadDescription;
+        delete window.__uploadHashtags;
+        delete window.__uploadPrivacy;
+        delete window.__uploadAllowComments;
+        delete window.__uploadAllowDuet;
+        script.remove();
+        
+        resolve(e.detail);
+      }, { once: true });
+      
+      window.addEventListener('upload-error', (e) => {
+        // Clean up
+        window.removeEventListener('upload-progress', progressHandler);
+        delete window.__uploadFile;
+        delete window.__uploadDescription;
+        delete window.__uploadHashtags;
+        delete window.__uploadPrivacy;
+        delete window.__uploadAllowComments;
+        delete window.__uploadAllowDuet;
+        script.remove();
+        
+        reject(e.detail);
+      }, { once: true });
+    });
   }
   
   cancel() {
@@ -270,6 +360,40 @@ class UploadPage extends LynxComponent {
               fontFamily: 'inherit'
             }
           })
+        ]),
+        
+        // Upload Progress
+        this.uploadProgress > 0 && lynx.div({
+          style: {
+            marginBottom: '24px'
+          }
+        }, [
+          lynx.text({
+            content: `업로드 진행률: ${Math.round(this.uploadProgress)}%`,
+            style: {
+              fontSize: '14px',
+              marginBottom: '8px',
+              fontWeight: 'bold'
+            }
+          }),
+          lynx.div({
+            style: {
+              width: '100%',
+              height: '8px',
+              backgroundColor: '#f0f0f0',
+              borderRadius: '4px',
+              overflow: 'hidden'
+            }
+          }, [
+            lynx.div({
+              style: {
+                width: `${this.uploadProgress}%`,
+                height: '100%',
+                backgroundColor: '#fe2c55',
+                transition: 'width 0.3s ease'
+              }
+            })
+          ])
         ]),
         
         // Hashtags

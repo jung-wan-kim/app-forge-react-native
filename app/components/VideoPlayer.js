@@ -17,6 +17,27 @@ class VideoPlayer extends LynxComponent {
 
   connectedCallback() {
     // Component is connected
+    this.setupVideo()
+  }
+  
+  setupVideo() {
+    // 비디오 요소 최적화 설정
+    setTimeout(() => {
+      const video = this.shadowRoot?.querySelector('video')
+      if (video) {
+        // 성능 최적화 설정
+        video.preload = 'metadata' // 메타데이터만 미리 로드
+        video.playsInline = true // 모바일에서 전체화면 방지
+        
+        // 자동 재생 최적화
+        if (this.isPlaying) {
+          video.muted = true
+          video.play().catch(err => console.log('자동재생 실패:', err))
+        }
+        
+        this.videoRef = video
+      }
+    }, 100)
   }
 
   togglePlay() {

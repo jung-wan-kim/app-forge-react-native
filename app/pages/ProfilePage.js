@@ -23,6 +23,85 @@ class ProfilePage extends LynxComponent {
   }
   
   async loadUserData() {
+    try {
+      // Supabase에서 데이터 가져오기 시도
+      const success = await this.loadSupabaseProfile()
+      
+      if (!success) {
+        // 실패하면 mock 데이터 사용
+        this.loadMockData()
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error)
+      this.loadMockData()
+    }
+  }
+  
+  async loadSupabaseProfile() {
+    try {
+      const script = document.createElement('script')
+      script.type = 'module'
+      script.textContent = `
+        import { profileApi } from '/src/api/profile.js';
+        
+        try {
+          const userId = '${this.userId}';
+          
+          // 프로필 정보
+          const profile = await profileApi.getUserProfile(userId);
+          
+          // 통계 정보
+          const stats = await profileApi.getUserStats(userId);
+          
+          // 비디오 목록
+          const videos = await profileApi.getUserVideos(userId);
+          
+          // 좋아요한 비디오
+          const likedVideos = await profileApi.getUserLikedVideos(userId);
+          
+          window.dispatchEvent(new CustomEvent('profile-loaded', { 
+            detail: { 
+              profile, 
+              stats, 
+              videos, 
+              likedVideos,
+              success: true 
+            } 
+          }));
+        } catch (error) {
+          window.dispatchEvent(new CustomEvent('profile-loaded', { 
+            detail: { success: false, error } 
+          }));
+        }
+      `;
+      
+      document.head.appendChild(script);
+      
+      const result = await new Promise((resolve) => {
+        window.addEventListener('profile-loaded', (e) => {
+          script.remove();
+          
+          if (e.detail.success && e.detail.profile) {
+            this.user = e.detail.profile;
+            this.stats = e.detail.stats;
+            this.videos = e.detail.videos || [];
+            this.likedVideosList = e.detail.likedVideos || [];
+            this.render();
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        }, { once: true });
+      });
+      
+      return result;
+    } catch (error) {
+      console.error('Error loading Supabase profile:', error);
+      return false;
+    }
+  }
+  
+  loadMockData() {
     // Mock data with more realistic content
     this.user = {
       id: this.userId,
@@ -378,13 +457,14 @@ class ProfilePage extends LynxComponent {
   }
   
   renderVideoThumbnail(video) {
+    const thumbnailUrl = video.thumbnail_url || video.thumbnail || 'https://picsum.photos/200/300?random=' + video.id;
     return lynx.div({
       style: {
         position: 'relative',
         paddingBottom: '133.33%',
         backgroundColor: '#ddd',
         cursor: 'pointer',
-        backgroundImage: `url(${video.thumbnail})`,
+        backgroundImage: `url(${thumbnailUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center'
       }
@@ -403,7 +483,7 @@ class ProfilePage extends LynxComponent {
         }
       }, [
         lynx.text({ content: '▶' }),
-        lynx.text({ content: this.formatNumber(video.views) })
+        lynx.text({ content: this.formatNumber(video.views || 0) })
       ])
     ])
   }

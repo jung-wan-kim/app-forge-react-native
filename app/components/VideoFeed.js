@@ -64,6 +64,7 @@ class VideoFeed extends LynxComponent {
   nextVideo() {
     this.currentIndex++
     this.scrollToVideo()
+    this.optimizeVideoStreaming()
     
     if (this.currentIndex >= this.videos.length - 2 && this.hasMore) {
       this.loadVideos()
@@ -73,6 +74,7 @@ class VideoFeed extends LynxComponent {
   previousVideo() {
     this.currentIndex--
     this.scrollToVideo()
+    this.optimizeVideoStreaming()
   }
 
   scrollToVideo() {
@@ -88,14 +90,67 @@ class VideoFeed extends LynxComponent {
     this.isLoading = true
     
     try {
-      // For now, always use mock videos to avoid module loading issues
-      this.loadMockVideos()
-      this.hasMore = false // No pagination for mock data
+      // 먼저 Supabase에서 데이터 가져오기 시도
+      const success = await this.loadSupabaseVideos()
+      
+      // 실패하면 mock 데이터 사용
+      if (!success) {
+        this.loadMockVideos()
+        this.hasMore = false
+      }
+      
+      // 비디오 비트레이트 최적화
+      this.optimizeVideoStreaming()
     } catch (error) {
       console.error('Error loading videos:', error)
+      this.loadMockVideos()
+      this.hasMore = false
     } finally {
       this.isLoading = false
       this.render()
+    }
+  }
+  
+  async loadSupabaseVideos() {
+    try {
+      const script = document.createElement('script')
+      script.type = 'module'
+      script.textContent = `
+        import { videosApi } from '/src/api/videos.js';
+        
+        try {
+          const videos = await videosApi.getVideos(${this.page}, 5);
+          window.dispatchEvent(new CustomEvent('videos-loaded', { detail: { videos, success: true } }));
+        } catch (error) {
+          window.dispatchEvent(new CustomEvent('videos-loaded', { detail: { success: false, error } }));
+        }
+      `;
+      
+      document.head.appendChild(script);
+      
+      const result = await new Promise((resolve) => {
+        window.addEventListener('videos-loaded', (e) => {
+          script.remove();
+          
+          if (e.detail.success && e.detail.videos) {
+            const newVideos = e.detail.videos;
+            if (newVideos.length === 0) {
+              this.hasMore = false;
+            } else {
+              this.videos = [...this.videos, ...newVideos];
+              this.page++;
+            }
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        }, { once: true });
+      });
+      
+      return result;
+    } catch (error) {
+      console.error('Error loading Supabase videos:', error);
+      return false;
     }
   }
   
@@ -238,6 +293,22 @@ class VideoFeed extends LynxComponent {
         ])
       )
     )
+  }
+  
+  optimizeVideoStreaming() {
+    // 현재 비디오만 로드, 다른 비디오는 일시정지
+    const videos = this.shadowRoot?.querySelectorAll('video-player')
+    if (videos) {
+      videos.forEach((videoPlayer, index) => {
+        if (index === this.currentIndex) {
+          // 현재 비디오는 자동 재생
+          videoPlayer.setAttribute('isPlaying', 'true')
+        } else {
+          // 다른 비디오는 일시정지
+          videoPlayer.setAttribute('isPlaying', 'false')
+        }
+      })
+    }
   }
 }
 
