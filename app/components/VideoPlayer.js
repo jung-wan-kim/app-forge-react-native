@@ -16,23 +16,7 @@ class VideoPlayer extends LynxComponent {
   }
 
   connectedCallback() {
-    this.setupVideoEvents()
-  }
-
-  setupVideoEvents() {
-    if (this.videoRef) {
-      this.videoRef.addEventListener('click', () => this.togglePlay())
-      this.videoRef.addEventListener('loadeddata', () => {
-        if (this.isPlaying) {
-          this.videoRef.play().catch(err => {
-            console.error('자동 재생 실패:', err)
-            this.isMuted = true
-            this.videoRef.muted = true
-            this.videoRef.play()
-          })
-        }
-      })
-    }
+    // Component is connected
   }
 
   togglePlay() {
@@ -55,10 +39,6 @@ class VideoPlayer extends LynxComponent {
     }
   }
 
-  handleVideoRef(el) {
-    this.videoRef = el
-    this.setupVideoEvents()
-  }
 
   render() {
     return lynx.div({
@@ -70,7 +50,7 @@ class VideoPlayer extends LynxComponent {
         overflow: 'hidden'
       }
     }, [
-      lynx.video({
+      lynx.element('video', {
         src: this.videoUrl,
         style: {
           width: '100%',
@@ -81,7 +61,7 @@ class VideoPlayer extends LynxComponent {
         muted: this.isMuted,
         loop: true,
         playsinline: true,
-        ref: (el) => this.handleVideoRef(el)
+        onclick: () => this.togglePlay()
       }),
       
       !this.isPlaying && lynx.div({
