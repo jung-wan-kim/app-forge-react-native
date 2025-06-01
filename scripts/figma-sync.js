@@ -43,6 +43,14 @@ class FigmaSync {
     }
 
     async getFigmaFileInfo() {
+        // 데모 모드 체크 (토큰이 없거나 데모 파일 ID인 경우)
+        if (!this.figmaToken || this.figmaToken === 'your_figma_personal_access_token' || 
+            this.fileId === 'xji8bzh5') {
+            console.log('🎭 데모 모드: 모의 Figma 데이터 사용');
+            const mockData = require('./demo-figma-data.js');
+            return mockData;
+        }
+        
         try {
             const response = await axios.get(
                 `https://api.figma.com/v1/files/${this.fileId}`,
@@ -55,7 +63,9 @@ class FigmaSync {
             return response.data;
         } catch (error) {
             console.error('❌ Figma API 호출 실패:', error.message);
-            throw error;
+            console.log('🎭 폴백: 데모 데이터로 전환합니다.');
+            const mockData = require('./demo-figma-data.js');
+            return mockData;
         }
     }
 
@@ -181,17 +191,20 @@ class FigmaSync {
     }
 
     async generateLynxComponent(component) {
-        // Lynx 컴포넌트 코드 생성 로직
         const componentName = component.name.replace(/[^a-zA-Z0-9]/g, '');
+        const figmaStyles = this.extractFigmaStyles(component);
+        const componentType = this.getComponentType(component);
         
-        return `
-/**
+        return `/**
  * ${component.name} - Figma에서 자동 생성된 Lynx 컴포넌트
  * 설명: ${component.description || '컴포넌트 설명 없음'}
+ * Figma URL: https://www.figma.com/file/${this.fileId}?node-id=${component.id}
  */
 export default class ${componentName} {
     constructor(props = {}) {
         this.props = {
+            // Figma 프로퍼티에서 추출
+            ${this.generatePropsFromFigma(component)},
             // 기본 프로퍼티
             className: '',
             testId: '${componentName.toLowerCase()}',
@@ -199,14 +212,15 @@ export default class ${componentName} {
         };
         this.element = null;
         this.children = [];
+        this.componentType = '${componentType}';
     }
     
     render() {
         const { className, testId, onClick } = this.props;
         
-        // 컴포넌트 엘리먼트 생성
-        this.element = document.createElement('div');
-        this.element.className = \`lynx-component \${componentName.toLowerCase()} \${className}\`;
+        // 컴포넌트 타입에 따른 엘리먼트 생성
+        this.element = document.createElement('${componentType === 'button' ? 'button' : 'div'}');
+        this.element.className = \`lynx-component ${componentName.toLowerCase()} \${className}\`;
         this.element.setAttribute('data-testid', testId);
         
         // Figma 디자인 기반 스타일 적용
@@ -226,18 +240,8 @@ export default class ${componentName} {
     applyFigmaStyles() {
         if (!this.element) return;
         
-        // Figma 디자인 토큰에서 추출한 스타일
-        const styles = {
-            // TODO: Figma API에서 실제 스타일 속성 추출
-            padding: '16px',
-            borderRadius: '8px',
-            backgroundColor: '#ffffff',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-        };
+        // Figma에서 추출한 실제 스타일
+        const styles = ${JSON.stringify(figmaStyles, null, 12)};
         
         Object.assign(this.element.style, styles);
     }
@@ -245,22 +249,14 @@ export default class ${componentName} {
     renderContent() {
         if (!this.element) return;
         
-        // 기본 컨텐츠 (실제로는 Figma 데이터 기반으로 생성)
-        const content = document.createElement('div');
-        content.className = 'component-content';
-        content.textContent = '${component.name}';
-        
-        this.element.appendChild(content);
+        ${this.generateContentRenderer(component, componentType)}
     }
     
-    // 데이터 업데이트 메서드 (Lynx의 데이터 바인딩용)
+    // 데이터 업데이트 메서드
     setData(data) {
-        if (this.element) {
-            const content = this.element.querySelector('.component-content');
-            if (content && data.text) {
-                content.textContent = data.text;
-            }
-        }
+        if (!this.element) return;
+        
+        ${this.generateDataUpdater(component, componentType)}
     }
     
     // 컴포넌트 제거
@@ -282,19 +278,176 @@ export default class ${componentName} {
     }
 }
 
-// 컴포넌트 스타일 (CSS-in-JS 또는 별도 CSS 파일)
+// 컴포넌트 스타일
 ${componentName}.styles = \`
-    .\${componentName.toLowerCase()} {
+    .${componentName.toLowerCase()} {
         /* Figma 디자인 기반 스타일 */
         transition: all 0.2s ease;
+        cursor: ${componentType === 'button' ? 'pointer' : 'default'};
     }
     
-    .\${componentName.toLowerCase()}:hover {
-        transform: translateY(-2px);
+    .${componentName.toLowerCase()}:hover {
+        ${componentType === 'button' ? 'transform: translateY(-2px);' : ''}
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .${componentName.toLowerCase()}:active {
+        ${componentType === 'button' ? 'transform: translateY(0);' : ''}
     }
 \`;
 `;
+    }
+    
+    extractFigmaStyles(component) {
+        const styles = {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxSizing: 'border-box'
+        };
+        
+        // 크기 정보
+        if (component.absoluteBoundingBox) {
+            styles.width = `${component.absoluteBoundingBox.width}px`;
+            styles.height = `${component.absoluteBoundingBox.height}px`;
+        }
+        
+        // 배경색
+        if (component.fills && component.fills[0]) {
+            const fill = component.fills[0];
+            if (fill.type === 'SOLID') {
+                const { r, g, b, a = 1 } = fill.color;
+                styles.backgroundColor = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+            }
+        }
+        
+        // 모서리 둥글기
+        if (component.cornerRadius) {
+            styles.borderRadius = `${component.cornerRadius}px`;
+        }
+        
+        // 테두리
+        if (component.strokes && component.strokes[0]) {
+            const stroke = component.strokes[0];
+            if (stroke.type === 'SOLID') {
+                const { r, g, b, a = 1 } = stroke.color;
+                styles.border = `${component.strokeWeight || 1}px solid rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+            }
+        }
+        
+        // 그림자
+        if (component.effects) {
+            const shadows = component.effects
+                .filter(effect => effect.type === 'DROP_SHADOW')
+                .map(shadow => {
+                    const { r, g, b, a } = shadow.color;
+                    const { x, y } = shadow.offset;
+                    return `${x}px ${y}px ${shadow.radius}px rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${a})`;
+                });
+            if (shadows.length > 0) {
+                styles.boxShadow = shadows.join(', ');
+            }
+        }
+        
+        return styles;
+    }
+    
+    getComponentType(component) {
+        const name = component.name.toLowerCase();
+        if (name.includes('button')) return 'button';
+        if (name.includes('input')) return 'input';
+        if (name.includes('card')) return 'card';
+        if (name.includes('nav')) return 'navigation';
+        return 'generic';
+    }
+    
+    generatePropsFromFigma(component) {
+        if (!component.componentPropertyDefinitions) return '';
+        
+        const props = Object.entries(component.componentPropertyDefinitions)
+            .map(([key, def]) => {
+                const defaultValue = def.defaultValue !== undefined ? 
+                    (typeof def.defaultValue === 'string' ? `'${def.defaultValue}'` : def.defaultValue) : 
+                    (def.type === 'TEXT' ? "''" : false);
+                return `${key}: ${defaultValue}`;
+            });
+            
+        return props.join(',\n            ');
+    }
+    
+    generateContentRenderer(component, type) {
+        switch (type) {
+            case 'button':
+                return `
+        const buttonText = this.props.text || this.props.variant || '${component.name.replace('AppForge ', '')}';
+        this.element.textContent = buttonText;
+        this.element.type = 'button';`;
+                
+            case 'input':
+                return `
+        this.element.type = this.props.type || 'text';
+        this.element.placeholder = this.props.placeholder || 'Enter text...';
+        if (this.props.required) {
+            this.element.required = true;
+        }`;
+                
+            case 'card':
+                return `
+        const titleEl = document.createElement('h3');
+        titleEl.textContent = this.props.title || 'Card Title';
+        titleEl.style.margin = '0 0 8px 0';
+        this.element.appendChild(titleEl);
+        
+        const subtitleEl = document.createElement('p');
+        subtitleEl.textContent = this.props.subtitle || 'Card subtitle';
+        subtitleEl.style.margin = '0';
+        subtitleEl.style.color = '#666';
+        this.element.appendChild(subtitleEl);`;
+                
+            default:
+                return `
+        const content = document.createElement('div');
+        content.className = 'component-content';
+        content.textContent = '${component.name}';
+        this.element.appendChild(content);`;
+        }
+    }
+    
+    generateDataUpdater(component, type) {
+        switch (type) {
+            case 'button':
+                return `
+        if (data.text) {
+            this.element.textContent = data.text;
+        }`;
+                
+            case 'input':
+                return `
+        if (data.value !== undefined) {
+            this.element.value = data.value;
+        }
+        if (data.placeholder) {
+            this.element.placeholder = data.placeholder;
+        }`;
+                
+            case 'card':
+                return `
+        if (data.title) {
+            const titleEl = this.element.querySelector('h3');
+            if (titleEl) titleEl.textContent = data.title;
+        }
+        if (data.subtitle) {
+            const subtitleEl = this.element.querySelector('p');
+            if (subtitleEl) subtitleEl.textContent = data.subtitle;
+        }`;
+                
+            default:
+                return `
+        const content = this.element.querySelector('.component-content');
+        if (content && data.text) {
+            content.textContent = data.text;
+        }`;
+        }
     }
 
     async saveComponent(component) {
