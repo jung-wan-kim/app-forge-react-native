@@ -7,6 +7,8 @@
     "setup": "./scripts/setup.sh",
     "lynx:setup": "./scripts/lynx-setup.sh",
     "start:taskmanager": "node automation/taskmanager.js",
+    "dev": "./scripts/dev.sh",
+    "dev:server": "node server.js",
     "dev:lynx": "cd app && python -m http.server 3000",
     "dev:watch": "chokidar \"app/**/*\" -c \"echo 'File changed: {path}'\"",
     "sync:figma": "node scripts/figma-sync.js",
@@ -17,11 +19,13 @@
     "test:e2e": "jest tests/e2e",
     "test:lynx": "node tests/lynx-test-runner.js",
     "test:all": "npm run test:lynx",
+    "test:platforms": "./scripts/test-platforms.sh",
+    "build": "./scripts/build-all.sh",
     "build:lynx": "echo 'Lynx 웹 빌드 - 추후 구현'",
     "build:ios": "echo 'Lynx → iOS 네이티브 빌드 - 추후 구현'",
     "build:android": "echo 'Lynx → Android 네이티브 빌드 - 추후 구현'",
     "build:web": "echo 'Lynx 웹 앱 빌드 - 추후 구현'",
-    "build:all": "concurrently \"npm run build:ios\" \"npm run build:android\" \"npm run build:web\"",
+    "build:all": "./scripts/build-all.sh",
     "deploy:ios": "echo 'iOS 배포 - 추후 구현'",
     "deploy:android": "echo 'Android 배포 - 추후 구현'",
     "deploy:web": "echo '웹 배포 - 추후 구현'",
@@ -45,20 +49,21 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "axios": "^1.6.0",
+    "chokidar": "^3.5.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "ws": "^8.14.2",
-    "chokidar": "^3.5.3",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "ws": "^8.14.2"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "jest": "^29.7.0",
-    "puppeteer": "^21.5.0",
-    "jsdom": "^23.0.0",
-    "eslint": "^8.54.0",
-    "prettier": "^3.1.0",
     "@types/node": "^20.9.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
+    "jsdom": "^23.0.0",
+    "prettier": "^3.1.0",
+    "puppeteer": "^21.5.0",
     "typescript": "^5.3.0"
   },
   "jest": {
@@ -72,7 +77,11 @@
       "automation/**/*.js"
     ],
     "coverageDirectory": "coverage",
-    "coverageReporters": ["text", "lcov", "html"]
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
   },
   "engines": {
     "node": ">=18.0.0",
