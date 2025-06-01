@@ -1,6 +1,23 @@
 class HomePage extends LynxComponent {
   constructor() {
     super()
+    this.commentsOpen = false
+    this.currentVideoId = null
+  }
+  
+  connectedCallback() {
+    super.connectedCallback()
+    this.addEventListener('open-comments', (e) => {
+      this.currentVideoId = e.detail.videoId
+      this.commentsOpen = true
+      this.render()
+    })
+    
+    this.addEventListener('close-comments', () => {
+      this.commentsOpen = false
+      this.currentVideoId = null
+      this.render()
+    })
   }
 
   render() {
@@ -78,6 +95,11 @@ class HomePage extends LynxComponent {
       
       lynx.element('navigation-bar', {
         activeTab: 'home'
+      }),
+      
+      lynx.element('comments-panel', {
+        videoId: this.currentVideoId,
+        isOpen: this.commentsOpen
       })
     ])
   }

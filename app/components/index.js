@@ -7,3 +7,4 @@ export { default as VideoPlayer } from './VideoPlayer.js';
 export { default as VideoFeed } from './VideoFeed.js';
 export { default as InteractionBar } from './InteractionBar.js';
 export { default as NavigationBar } from './NavigationBar.js';
+export { default as CommentsPanel } from './CommentsPanel.js';

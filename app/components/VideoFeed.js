@@ -10,6 +10,9 @@ class VideoFeed extends LynxComponent {
     this.currentIndex = 0
     this.touchStartY = 0
     this.scrollThreshold = 50
+    this.page = 0
+    this.isLoading = false
+    this.hasMore = true
   }
 
   connectedCallback() {
@@ -62,6 +65,10 @@ class VideoFeed extends LynxComponent {
   nextVideo() {
     this.currentIndex++
     this.scrollToVideo()
+    
+    if (this.currentIndex >= this.videos.length - 2 && this.hasMore) {
+      this.loadVideos()
+    }
   }
 
   previousVideo() {
@@ -77,27 +84,72 @@ class VideoFeed extends LynxComponent {
   }
 
   async loadVideos() {
+    if (this.isLoading || !this.hasMore) return
+    
+    this.isLoading = true
+    
+    try {
+      const script = document.createElement('script')
+      script.type = 'module'
+      script.textContent = `
+        import { videosApi } from '/src/api/videos.js';
+        const videos = await videosApi.getVideos(${this.page});
+        window.dispatchEvent(new CustomEvent('videos-loaded', { detail: videos }));
+      `
+      document.head.appendChild(script)
+      
+      await new Promise((resolve) => {
+        window.addEventListener('videos-loaded', (e) => {
+          const newVideos = e.detail
+          if (newVideos.length === 0) {
+            this.hasMore = false
+          } else {
+            this.videos = [...this.videos, ...newVideos]
+            this.page++
+          }
+          resolve()
+        }, { once: true })
+      })
+    } catch (error) {
+      console.error('Error loading videos:', error)
+      this.loadMockVideos()
+    } finally {
+      this.isLoading = false
+      this.render()
+    }
+  }
+  
+  loadMockVideos() {
     this.videos = [
       {
         id: '1',
         url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
         username: '@testuser1',
         description: '첫 번째 테스트 비디오입니다 #틱톡클론 #테스트',
-        likes: 1234,
-        comments: 56,
-        shares: 12
+        likes_count: 1234,
+        comments_count: 56,
+        shares: 12,
+        user: {
+          username: 'testuser1',
+          profile_picture: null,
+          verified: false
+        }
       },
       {
         id: '2',
         url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_2mb.mp4',
         username: '@testuser2',
         description: '두 번째 테스트 비디오입니다 #개발중',
-        likes: 5678,
-        comments: 123,
-        shares: 45
+        likes_count: 5678,
+        comments_count: 123,
+        shares: 45,
+        user: {
+          username: 'testuser2',
+          profile_picture: null,
+          verified: true
+        }
       }
     ]
-    this.render()
   }
 
   render() {
@@ -138,7 +190,7 @@ class VideoFeed extends LynxComponent {
             }
           }, [
             lynx.text({
-              content: video.username,
+              content: `@${video.user?.username || video.username}`,
               style: {
                 fontSize: '16px',
                 fontWeight: 'bold',
@@ -156,9 +208,10 @@ class VideoFeed extends LynxComponent {
           
           lynx.element('interaction-bar', {
             videoId: video.id,
-            likes: video.likes,
-            comments: video.comments,
-            shares: video.shares
+            likes: video.likes_count || video.likes,
+            comments: video.comments_count || video.comments,
+            shares: video.shares || 0,
+            user: video.user
           })
         ])
       )

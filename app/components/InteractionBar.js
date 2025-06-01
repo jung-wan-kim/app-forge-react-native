@@ -5,7 +5,8 @@ class InteractionBar extends LynxComponent {
     comments: { type: Number },
     shares: { type: Number },
     isLiked: { type: Boolean },
-    isFollowing: { type: Boolean }
+    isFollowing: { type: Boolean },
+    user: { type: Object }
   }
 
   constructor() {
@@ -16,6 +17,8 @@ class InteractionBar extends LynxComponent {
     this.shares = 0
     this.isLiked = false
     this.isFollowing = false
+    this.user = null
+    this.currentUserId = 'test-user-1'
   }
 
   formatNumber(num) {
@@ -27,10 +30,37 @@ class InteractionBar extends LynxComponent {
     return num.toString()
   }
 
-  toggleLike() {
+  async toggleLike() {
+    const previousState = this.isLiked
+    const previousLikes = this.likes
+    
     this.isLiked = !this.isLiked
     this.likes += this.isLiked ? 1 : -1
     this.render()
+    
+    try {
+      const script = document.createElement('script')
+      script.type = 'module'
+      script.textContent = `
+        import { videosApi } from '/src/api/videos.js';
+        const result = await videosApi.likeVideo('${this.videoId}', '${this.currentUserId}');
+        window.dispatchEvent(new CustomEvent('like-toggled', { detail: result }));
+      `
+      document.head.appendChild(script)
+      
+      await new Promise((resolve, reject) => {
+        window.addEventListener('like-toggled', (e) => {
+          resolve(e.detail)
+        }, { once: true })
+        
+        setTimeout(() => reject(new Error('Timeout')), 5000)
+      })
+    } catch (error) {
+      console.error('Error toggling like:', error)
+      this.isLiked = previousState
+      this.likes = previousLikes
+      this.render()
+    }
   }
 
   toggleFollow() {
@@ -39,7 +69,12 @@ class InteractionBar extends LynxComponent {
   }
 
   openComments() {
-    console.log('댓글 열기:', this.videoId)
+    const event = new CustomEvent('open-comments', {
+      detail: { videoId: this.videoId },
+      bubbles: true,
+      composed: true
+    })
+    this.dispatchEvent(event)
   }
 
   shareVideo() {

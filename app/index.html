@@ -35,7 +35,11 @@
   <script src="components/VideoFeed.js"></script>
   <script src="components/InteractionBar.js"></script>
   <script src="components/NavigationBar.js"></script>
+  <script src="components/CommentsPanel.js"></script>
   <script src="pages/HomePage.js"></script>
+  <script src="pages/ProfilePage.js"></script>
+  <script src="pages/UploadPage.js"></script>
+  <script src="App.js"></script>
 
   <script>
     // Lynx 컴포넌트 등록
@@ -43,11 +47,15 @@
     lynx.registerComponent('video-feed', VideoFeed)
     lynx.registerComponent('interaction-bar', InteractionBar)
     lynx.registerComponent('navigation-bar', NavigationBar)
+    lynx.registerComponent('comments-panel', CommentsPanel)
     lynx.registerComponent('home-page', HomePage)
+    lynx.registerComponent('profile-page', ProfilePage)
+    lynx.registerComponent('upload-page', UploadPage)
+    lynx.registerComponent('app', App)
 
     // 앱 시작
     const app = document.getElementById('app')
-    lynx.mount(app, lynx.element('home-page'))
+    lynx.mount(app, lynx.element('app'))
   </script>
 </body>
 </html>
