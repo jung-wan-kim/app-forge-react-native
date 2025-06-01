@@ -9,8 +9,20 @@ import {
 import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ActionButton from './ActionButton';
+import HeartIcon from './icons/HeartIcon';
+import CommentIcon from './icons/CommentIcon';
+import ShareIcon from './icons/ShareIcon';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+const formatCount = (count) => {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M`;
+  } else if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K`;
+  }
+  return count.toString();
+};
 
 const VideoPlayer = ({ item, isActive }) => {
   const [paused, setPaused] = useState(!isActive);
@@ -79,27 +91,28 @@ const VideoPlayer = ({ item, isActive }) => {
             </TouchableOpacity>
 
             {/* 좋아요 */}
-            <ActionButton
-              icon={liked ? "favorite" : "favorite-border"}
-              count={item.likes_count}
-              isActive={liked}
-              onPress={handleLike}
-              color="#ff4757"
-            />
+            <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
+              <View style={[styles.actionIconWrapper, liked && styles.actionIconActive]}>
+                <HeartIcon size={28} color={liked ? "#ff4757" : "#fff"} filled={liked} />
+              </View>
+              <Text style={styles.actionText}>{formatCount(item.likes_count || 0)}</Text>
+            </TouchableOpacity>
 
             {/* 댓글 */}
-            <ActionButton
-              icon="chat-bubble-outline"
-              count={item.comments_count}
-              onPress={handleComment}
-            />
+            <TouchableOpacity style={styles.actionButton} onPress={handleComment}>
+              <View style={styles.actionIconWrapper}>
+                <CommentIcon size={28} color="#fff" />
+              </View>
+              <Text style={styles.actionText}>{formatCount(item.comments_count || 0)}</Text>
+            </TouchableOpacity>
 
             {/* 공유 */}
-            <ActionButton
-              icon="share"
-              count={item.shares_count}
-              onPress={handleShare}
-            />
+            <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
+              <View style={styles.actionIconWrapper}>
+                <ShareIcon size={28} color="#fff" />
+              </View>
+              <Text style={styles.actionText}>{formatCount(item.shares_count || 0)}</Text>
+            </TouchableOpacity>
 
             {/* 음악 */}
             <TouchableOpacity style={styles.musicButton}>
@@ -236,6 +249,30 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  actionButton: {
+    alignItems: 'center',
+    marginBottom: 25,
+  },
+  actionIconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  actionIconActive: {
+    backgroundColor: 'rgba(255, 71, 87, 0.2)',
+  },
+  actionText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 });
 

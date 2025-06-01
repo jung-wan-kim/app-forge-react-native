@@ -3,7 +3,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet, View, Text } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
+// SVG 아이콘 임포트
+import HomeIcon from './src/components/icons/HomeIcon';
+import DiscoverIcon from './src/components/icons/DiscoverIcon';
+import AddIcon from './src/components/icons/AddIcon';
+import InboxIcon from './src/components/icons/InboxIcon';
+import ProfileIcon from './src/components/icons/ProfileIcon';
 
 // 화면 임포트
 import HomeScreen from './src/screens/HomeScreen';
@@ -24,19 +30,11 @@ function App() {
         <Tab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ focused, color, size }) => {
-              let iconName;
-
-              // Figma 기준 아이콘 매핑
+              // Figma 기준 SVG 아이콘 사용
               if (route.name === 'Home') {
-                // Figma: home 아이콘
-                return (
-                  <View style={{ alignItems: 'center' }}>
-                    <Icon name={focused ? 'home' : 'home'} size={28} color={color} />
-                  </View>
-                );
+                return <HomeIcon size={28} color={color} filled={focused} />;
               } else if (route.name === 'Search') {
-                iconName = focused ? 'search' : 'search';
-                return <Icon name={iconName} size={28} color={color} />;
+                return <DiscoverIcon size={28} color={color} />;
               } else if (route.name === 'Upload') {
                 // TikTok 스타일 업로드 버튼
                 return (
@@ -65,18 +63,15 @@ function App() {
                       borderRadius: 8,
                       backgroundColor: '#ff0050',
                     }} />
-                    <Icon name="add" size={22} color={focused ? '#000' : '#000'} />
+                    <AddIcon size={22} color={focused ? '#000' : '#000'} />
                   </View>
                 );
               } else if (route.name === 'Inbox') {
-                iconName = focused ? 'mail' : 'mail-outline';
-                return <Icon name={iconName} size={28} color={color} />;
+                return <InboxIcon size={28} color={color} filled={focused} />;
               } else if (route.name === 'Profile') {
-                iconName = focused ? 'person' : 'person-outline';
-                return <Icon name={iconName} size={28} color={color} />;
+                return <ProfileIcon size={28} color={color} filled={focused} />;
               }
 
-              // 기본 반환값 (사용되지 않음)
               return null;
             },
             tabBarActiveTintColor: '#fff',
@@ -102,14 +97,14 @@ function App() {
             name="Home" 
             component={HomeScreen}
             options={{
-              tabBarLabel: '홈',
+              tabBarLabel: 'Home',
             }}
           />
           <Tab.Screen 
             name="Search" 
             component={SearchScreen}
             options={{
-              tabBarLabel: '디스커버',
+              tabBarLabel: 'Discover',
             }}
           />
           <Tab.Screen 
@@ -123,14 +118,14 @@ function App() {
             name="Inbox" 
             component={InboxScreen}
             options={{
-              tabBarLabel: '받은편지함',
+              tabBarLabel: 'Inbox',
             }}
           />
           <Tab.Screen 
             name="Profile" 
             component={ProfileScreen}
             options={{
-              tabBarLabel: '나',
+              tabBarLabel: 'Me',
             }}
           />
         </Tab.Navigator>
