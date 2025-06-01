@@ -4,7 +4,7 @@ global.fetch = require('node-fetch');
 const { createClient } = require('@supabase/supabase-js');
 
 // Supabase 설정
-const supabaseUrl = 'https://puoscoaltsznczqdfjh.supabase.co';
+const supabaseUrl = 'https://pquoscoaltsznczqdfjh.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1b3Njb2FsdHN6bmN6cWRmamgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNjE2NjM1NCwiZXhwIjoyMDUxNzQyMzU0fQ.VQqYqHrCdlrMTpdjj0bniJF4e8t2OtYr0gWjx76K8gY';
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
