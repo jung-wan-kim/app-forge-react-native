@@ -11,6 +11,7 @@ import SearchScreen from './src/screens/SearchScreen';
 import UploadScreen from './src/screens/UploadScreen';
 import InboxScreen from './src/screens/InboxScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import AdminScreen from './src/screens/AdminScreen';
 
 // Supabase 설정
 import './src/config/supabase';
@@ -54,6 +55,15 @@ function App() {
           <Tab.Screen name="Upload" component={UploadScreen} />
           <Tab.Screen name="Inbox" component={InboxScreen} />
           <Tab.Screen name="Profile" component={ProfileScreen} />
+          <Tab.Screen 
+            name="Admin" 
+            component={AdminScreen}
+            options={{
+              tabBarIcon: ({ focused, color, size }) => (
+                <Icon name="settings" size={size} color={color} />
+              ),
+            }}
+          />
         </Tab.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
