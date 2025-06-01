@@ -38,29 +38,9 @@ class InteractionBar extends LynxComponent {
     this.likes += this.isLiked ? 1 : -1
     this.render()
     
-    try {
-      const script = document.createElement('script')
-      script.type = 'module'
-      script.textContent = `
-        import { videosApi } from '/src/api/videos.js';
-        const result = await videosApi.likeVideo('${this.videoId}', '${this.currentUserId}');
-        window.dispatchEvent(new CustomEvent('like-toggled', { detail: result }));
-      `
-      document.head.appendChild(script)
-      
-      await new Promise((resolve, reject) => {
-        window.addEventListener('like-toggled', (e) => {
-          resolve(e.detail)
-        }, { once: true })
-        
-        setTimeout(() => reject(new Error('Timeout')), 5000)
-      })
-    } catch (error) {
-      console.error('Error toggling like:', error)
-      this.isLiked = previousState
-      this.likes = previousLikes
-      this.render()
-    }
+    // Mock API call - just update local state
+    // In production, this would call the actual API
+    console.log('Like toggled for video:', this.videoId);
   }
 
   toggleFollow() {
@@ -74,7 +54,7 @@ class InteractionBar extends LynxComponent {
       bubbles: true,
       composed: true
     })
-    this.dispatchEvent(event)
+    window.dispatchEvent(event)
   }
 
   shareVideo() {

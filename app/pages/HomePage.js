@@ -6,13 +6,14 @@ class HomePage extends LynxComponent {
   }
   
   connectedCallback() {
-    this.addEventListener('open-comments', (e) => {
+    // Event listeners should be added to window or document, not component instance
+    window.addEventListener('open-comments', (e) => {
       this.currentVideoId = e.detail.videoId
       this.commentsOpen = true
       this.render()
     })
     
-    this.addEventListener('close-comments', () => {
+    window.addEventListener('close-comments', () => {
       this.commentsOpen = false
       this.currentVideoId = null
       this.render()
