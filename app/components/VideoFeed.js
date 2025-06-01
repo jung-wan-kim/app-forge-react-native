@@ -5,7 +5,6 @@ class VideoFeed extends LynxComponent {
   }
 
   constructor() {
-    super()
     this.videos = []
     this.currentIndex = 0
     this.touchStartY = 0
@@ -16,7 +15,6 @@ class VideoFeed extends LynxComponent {
   }
 
   connectedCallback() {
-    super.connectedCallback()
     this.setupTouchEvents()
     this.loadVideos()
   }

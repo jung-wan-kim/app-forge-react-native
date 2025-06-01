@@ -1,11 +1,9 @@
 class App extends LynxComponent {
   constructor() {
-    super()
     this.currentPage = 'home'
   }
   
   connectedCallback() {
-    super.connectedCallback()
     window.addEventListener('navigation', (e) => {
       this.currentPage = e.detail.tab
       this.render()

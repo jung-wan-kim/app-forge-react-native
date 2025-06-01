@@ -6,7 +6,6 @@ class CommentsPanel extends LynxComponent {
   }
 
   constructor() {
-    super()
     this.videoId = ''
     this.isOpen = false
     this.comments = []
@@ -16,7 +15,6 @@ class CommentsPanel extends LynxComponent {
   }
 
   async connectedCallback() {
-    super.connectedCallback()
     if (this.videoId && this.isOpen) {
       await this.loadComments()
     }

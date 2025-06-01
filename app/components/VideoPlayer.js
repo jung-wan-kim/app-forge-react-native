@@ -7,7 +7,6 @@ class VideoPlayer extends LynxComponent {
   }
 
   constructor() {
-    super()
     this.videoUrl = ''
     this.isPlaying = true
     this.isMuted = false
@@ -16,7 +15,6 @@ class VideoPlayer extends LynxComponent {
   }
 
   connectedCallback() {
-    super.connectedCallback()
     this.setupVideoEvents()
   }
 

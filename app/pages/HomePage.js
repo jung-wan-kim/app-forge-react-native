@@ -1,12 +1,10 @@
 class HomePage extends LynxComponent {
   constructor() {
-    super()
     this.commentsOpen = false
     this.currentVideoId = null
   }
   
   connectedCallback() {
-    super.connectedCallback()
     this.addEventListener('open-comments', (e) => {
       this.currentVideoId = e.detail.videoId
       this.commentsOpen = true
