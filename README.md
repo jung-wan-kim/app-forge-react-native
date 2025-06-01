@@ -63,6 +63,17 @@ SUPABASE_ANON_KEY=your_supabase_anon_key
 FIGMA_ACCESS_TOKEN=your_figma_token
 FIGMA_FILE_ID=your_figma_file_id
 
+# 🎯 Figma 채널 설정 (선택적 동기화)
+FIGMA_CHANNEL_ENABLED=true
+FIGMA_CHANNEL_PAGES=Design System,Components,Mobile UI
+FIGMA_CHANNEL_FRAMES=Button,Input,Card,Navigation
+FIGMA_CHANNEL_PREFIX=AppForge
+FIGMA_CHANNEL_EXCLUDE_PATTERN=Draft,WIP,Archive
+
+# 📢 Figma 알림 설정
+FIGMA_WEBHOOK_URL=https://hooks.slack.com/your/webhook
+FIGMA_NOTIFICATION_CHANNEL=#design-updates
+
 # 배포 설정
 IOS_TEAM_ID=your_ios_team_id
 ANDROID_KEYSTORE_PATH=path_to_keystore
@@ -72,7 +83,9 @@ ANDROID_KEYSTORE_PATH=path_to_keystore
 
 ### 1. 디자인 변경 감지
 - Figma API를 통한 디자인 변경 모니터링
+- **채널 기반 선택적 동기화** (특정 페이지/프레임만)
 - 컴포넌트 변경사항 자동 분석
+- Slack/웹훅 실시간 알림
 
 ### 2. 코드 생성
 - Figma 디자인 → Lynx 컴포넌트 코드 자동 생성
@@ -165,6 +178,81 @@ npm run pipeline:full
 # 테스트만 실행
 npm run test:all
 ```
+
+## 🎯 Figma 채널 설정
+
+App Forge는 **채널 기반 선택적 동기화**를 지원하여 특정 Figma 페이지나 컴포넌트만 자동화할 수 있습니다.
+
+### 📋 채널 설정 옵션
+
+| 환경변수 | 설명 | 예시 |
+|---------|------|------|
+| `FIGMA_CHANNEL_ENABLED` | 채널 필터링 활성화 | `true` |
+| `FIGMA_CHANNEL_PAGES` | 동기화할 페이지명 (쉼표 구분) | `Design System,Components` |
+| `FIGMA_CHANNEL_FRAMES` | 동기화할 프레임명 (쉼표 구분) | `Button,Input,Card` |
+| `FIGMA_CHANNEL_PREFIX` | 컴포넌트명 프리픽스 필터 | `AppForge` |
+| `FIGMA_CHANNEL_EXCLUDE_PATTERN` | 제외할 패턴 (쉼표 구분) | `Draft,WIP,Archive` |
+
+### 🔧 채널 설정 예시
+
+#### 1. 디자인 시스템만 동기화
+```env
+FIGMA_CHANNEL_ENABLED=true
+FIGMA_CHANNEL_PAGES=Design System
+FIGMA_CHANNEL_FRAMES=
+FIGMA_CHANNEL_PREFIX=DS
+FIGMA_CHANNEL_EXCLUDE_PATTERN=Draft,Old
+```
+
+#### 2. 특정 컴포넌트만 동기화
+```env
+FIGMA_CHANNEL_ENABLED=true
+FIGMA_CHANNEL_PAGES=
+FIGMA_CHANNEL_FRAMES=Button,Input,Card,Modal
+FIGMA_CHANNEL_PREFIX=
+FIGMA_CHANNEL_EXCLUDE_PATTERN=Test,WIP
+```
+
+#### 3. 프로덕션 준비된 컴포넌트만
+```env
+FIGMA_CHANNEL_ENABLED=true
+FIGMA_CHANNEL_PAGES=Production,Release
+FIGMA_CHANNEL_FRAMES=
+FIGMA_CHANNEL_PREFIX=Prod
+FIGMA_CHANNEL_EXCLUDE_PATTERN=Draft,Beta,Archive
+```
+
+### 📢 알림 설정
+
+#### Slack 웹훅 설정
+```env
+FIGMA_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
+FIGMA_NOTIFICATION_CHANNEL=#design-updates
+```
+
+#### 알림 메시지 예시
+```
+🎨 Figma 동기화 완료: 3개 컴포넌트 업데이트
+
+📄 Design System: Button, Input
+📄 Components: Card
+
+🔗 Figma 파일: https://www.figma.com/file/abc123
+```
+
+### 🔍 채널 필터링 작동 방식
+
+1. **페이지 필터링**: `FIGMA_CHANNEL_PAGES`에 지정된 페이지의 컴포넌트만 처리
+2. **프레임 필터링**: `FIGMA_CHANNEL_FRAMES`에 지정된 이름을 포함한 컴포넌트만 처리  
+3. **프리픽스 필터링**: `FIGMA_CHANNEL_PREFIX`로 시작하는 컴포넌트만 처리
+4. **제외 패턴**: `FIGMA_CHANNEL_EXCLUDE_PATTERN`에 포함된 단어가 있는 컴포넌트 제외
+
+### 💡 채널 설정 팁
+
+- **점진적 롤아웃**: 처음에는 작은 범위로 시작하여 점진적으로 확장
+- **명명 규칙**: 일관된 페이지/컴포넌트 명명 규칙 사용
+- **제외 패턴**: `Draft`, `WIP`, `Archive` 등으로 작업 중인 컴포넌트 제외
+- **알림 설정**: 팀 채널에 알림 설정으로 투명성 확보
 
 ## 🧪 테스트 전략
 

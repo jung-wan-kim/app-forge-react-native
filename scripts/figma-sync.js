@@ -14,11 +14,32 @@ class FigmaSync {
     constructor() {
         this.figmaToken = process.env.FIGMA_ACCESS_TOKEN;
         this.fileId = process.env.FIGMA_FILE_ID;
+        this.teamId = process.env.FIGMA_TEAM_ID;
         this.lastVersionPath = path.join(__dirname, '../.figma-version');
+        
+        // 채널 설정
+        this.channelEnabled = process.env.FIGMA_CHANNEL_ENABLED === 'true';
+        this.allowedPages = this.parseList(process.env.FIGMA_CHANNEL_PAGES);
+        this.allowedFrames = this.parseList(process.env.FIGMA_CHANNEL_FRAMES);
+        this.channelPrefix = process.env.FIGMA_CHANNEL_PREFIX || '';
+        this.excludePattern = process.env.FIGMA_CHANNEL_EXCLUDE_PATTERN || '';
+        
+        // 알림 설정
+        this.webhookUrl = process.env.FIGMA_WEBHOOK_URL;
+        this.notificationChannel = process.env.FIGMA_NOTIFICATION_CHANNEL;
+        
+        // 버전 관리
+        this.versionBranch = process.env.FIGMA_VERSION_BRANCH || 'main';
+        this.autoCreateBranch = process.env.FIGMA_AUTO_CREATE_BRANCH === 'true';
         
         if (!this.figmaToken || !this.fileId) {
             throw new Error('FIGMA_ACCESS_TOKEN과 FIGMA_FILE_ID가 필요합니다.');
         }
+    }
+    
+    parseList(envVar) {
+        if (!envVar) return [];
+        return envVar.split(',').map(item => item.trim()).filter(item => item.length > 0);
     }
 
     async getFigmaFileInfo() {
@@ -54,24 +75,109 @@ class FigmaSync {
     async extractComponents(figmaData) {
         const components = [];
         
-        function traverse(node) {
+        const traverse = (node, parentInfo = {}) => {
+            // 채널 필터링 적용
+            if (this.channelEnabled && !this.shouldIncludeNode(node, parentInfo)) {
+                return;
+            }
+            
             if (node.type === 'COMPONENT' || node.type === 'COMPONENT_SET') {
-                components.push({
+                const component = {
                     id: node.id,
                     name: node.name,
                     type: node.type,
                     description: node.description || '',
-                    properties: node.componentPropertyDefinitions || {}
-                });
+                    properties: node.componentPropertyDefinitions || {},
+                    // 채널 메타데이터 추가
+                    channel: {
+                        page: parentInfo.pageName,
+                        frame: parentInfo.frameName,
+                        path: parentInfo.path || []
+                    },
+                    figmaUrl: `https://www.figma.com/file/${this.fileId}?node-id=${node.id}`,
+                    lastModified: figmaData.lastModified || new Date().toISOString()
+                };
+                
+                components.push(component);
+                console.log(`📦 컴포넌트 발견: ${component.name} (${component.channel.page}/${component.channel.frame})`);
             }
             
             if (node.children) {
-                node.children.forEach(traverse);
+                const childParentInfo = {
+                    ...parentInfo,
+                    path: [...(parentInfo.path || []), node.name]
+                };
+                
+                // 페이지나 프레임 정보 업데이트
+                if (node.type === 'CANVAS') {
+                    childParentInfo.pageName = node.name;
+                } else if (node.type === 'FRAME') {
+                    childParentInfo.frameName = node.name;
+                }
+                
+                node.children.forEach(child => traverse(child, childParentInfo));
+            }
+        };
+        
+        figmaData.document.children.forEach(child => traverse(child));
+        
+        console.log(`🎯 채널 필터링 결과: ${components.length}개 컴포넌트 선택됨`);
+        return components;
+    }
+    
+    shouldIncludeNode(node, parentInfo) {
+        const nodeName = node.name || '';
+        const pageName = parentInfo.pageName || '';
+        const frameName = parentInfo.frameName || '';
+        
+        // 제외 패턴 체크
+        if (this.excludePattern) {
+            const excludePatterns = this.excludePattern.split(',').map(p => p.trim());
+            for (const pattern of excludePatterns) {
+                if (nodeName.toLowerCase().includes(pattern.toLowerCase()) ||
+                    pageName.toLowerCase().includes(pattern.toLowerCase()) ||
+                    frameName.toLowerCase().includes(pattern.toLowerCase())) {
+                    console.log(`🚫 제외됨 (패턴 매칭): ${nodeName} - ${pattern}`);
+                    return false;
+                }
             }
         }
         
-        figmaData.document.children.forEach(traverse);
-        return components;
+        // 채널 프리픽스 체크
+        if (this.channelPrefix && !nodeName.startsWith(this.channelPrefix)) {
+            // 컴포넌트가 아닌 경우 하위 노드를 확인하기 위해 통과
+            if (node.type !== 'COMPONENT' && node.type !== 'COMPONENT_SET') {
+                return true;
+            }
+            console.log(`🚫 제외됨 (프리픽스): ${nodeName} - 필요 프리픽스: ${this.channelPrefix}`);
+            return false;
+        }
+        
+        // 허용된 페이지 체크
+        if (this.allowedPages.length > 0 && pageName) {
+            const pageAllowed = this.allowedPages.some(allowedPage => 
+                pageName.toLowerCase().includes(allowedPage.toLowerCase())
+            );
+            if (!pageAllowed) {
+                console.log(`🚫 제외됨 (페이지): ${pageName} - 허용 페이지: ${this.allowedPages.join(', ')}`);
+                return false;
+            }
+        }
+        
+        // 허용된 프레임 체크 (컴포넌트인 경우만)
+        if (this.allowedFrames.length > 0 && 
+            (node.type === 'COMPONENT' || node.type === 'COMPONENT_SET')) {
+            const frameAllowed = this.allowedFrames.some(allowedFrame => 
+                nodeName.toLowerCase().includes(allowedFrame.toLowerCase()) ||
+                (frameName && frameName.toLowerCase().includes(allowedFrame.toLowerCase()))
+            );
+            if (!frameAllowed) {
+                console.log(`🚫 제외됨 (프레임): ${nodeName} - 허용 프레임: ${this.allowedFrames.join(', ')}`);
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     async generateLynxComponent(component) {
@@ -309,6 +415,15 @@ ${componentName}.styles = \`
     async sync() {
         console.log('🔄 Figma 동기화를 시작합니다...');
         
+        // 채널 설정 로그
+        if (this.channelEnabled) {
+            console.log('📻 채널 필터링 활성화:');
+            console.log(`   📄 허용 페이지: ${this.allowedPages.join(', ') || '모든 페이지'}`);
+            console.log(`   🖼️  허용 프레임: ${this.allowedFrames.join(', ') || '모든 프레임'}`);
+            console.log(`   🏷️  프리픽스: ${this.channelPrefix || '없음'}`);
+            console.log(`   🚫 제외 패턴: ${this.excludePattern || '없음'}`);
+        }
+        
         try {
             const figmaData = await this.getFigmaFileInfo();
             const currentVersion = figmaData.version;
@@ -326,13 +441,25 @@ ${componentName}.styles = \`
             const components = await this.extractComponents(figmaData);
             console.log(`📦 ${components.length}개의 컴포넌트를 발견했습니다.`);
             
+            // 컴포넌트가 없으면 알림 후 종료
+            if (components.length === 0) {
+                console.log('⚠️  채널 필터링 후 생성할 컴포넌트가 없습니다.');
+                await this.sendChannelNotification('No components to sync', 'warning');
+                return;
+            }
+            
             // 컴포넌트 코드 생성
+            const generatedComponents = [];
             for (const component of components) {
                 await this.saveComponent(component);
+                generatedComponents.push(component);
             }
             
             // TaskManager에 작업 등록
-            await this.triggerTaskManager(components);
+            await this.triggerTaskManager(generatedComponents);
+            
+            // 채널 알림 전송
+            await this.sendChannelNotification(generatedComponents);
             
             // 버전 저장
             await this.saveLastVersion(currentVersion);
@@ -341,7 +468,106 @@ ${componentName}.styles = \`
             
         } catch (error) {
             console.error('❌ Figma 동기화 실패:', error.message);
+            await this.sendChannelNotification(error.message, 'error');
             process.exit(1);
+        }
+    }
+    
+    async sendChannelNotification(components, type = 'success') {
+        if (!this.webhookUrl && !this.notificationChannel) {
+            return;
+        }
+        
+        let message;
+        let color;
+        
+        switch (type) {
+            case 'success':
+                message = this.formatSuccessMessage(components);
+                color = '#36a64f'; // green
+                break;
+            case 'warning':
+                message = components; // warning message string
+                color = '#ff9500'; // orange
+                break;
+            case 'error':
+                message = `❌ Figma 동기화 실패: ${components}`;
+                color = '#ff0000'; // red
+                break;
+        }
+        
+        // Slack 웹훅 전송
+        if (this.webhookUrl) {
+            try {
+                await this.sendSlackNotification(message, color);
+                console.log('📢 Slack 알림 전송됨');
+            } catch (error) {
+                console.error('❌ Slack 알림 전송 실패:', error.message);
+            }
+        }
+        
+        // 커스텀 웹훅 전송
+        if (this.notificationChannel) {
+            try {
+                await this.sendCustomNotification(message, type);
+                console.log('📢 채널 알림 전송됨');
+            } catch (error) {
+                console.error('❌ 채널 알림 전송 실패:', error.message);
+            }
+        }
+    }
+    
+    formatSuccessMessage(components) {
+        if (!Array.isArray(components)) return components;
+        
+        const summary = components.reduce((acc, comp) => {
+            const page = comp.channel.page || 'Unknown';
+            if (!acc[page]) acc[page] = [];
+            acc[page].push(comp.name);
+            return acc;
+        }, {});
+        
+        let message = `🎨 Figma 동기화 완료: ${components.length}개 컴포넌트 업데이트\n\n`;
+        
+        for (const [page, comps] of Object.entries(summary)) {
+            message += `📄 **${page}**: ${comps.join(', ')}\n`;
+        }
+        
+        message += `\n🔗 Figma 파일: https://www.figma.com/file/${this.fileId}`;
+        
+        return message;
+    }
+    
+    async sendSlackNotification(message, color) {
+        const payload = {
+            text: '🎨 Figma 동기화 알림',
+            attachments: [{
+                color: color,
+                text: message,
+                ts: Math.floor(Date.now() / 1000)
+            }]
+        };
+        
+        await axios.post(this.webhookUrl, payload);
+    }
+    
+    async sendCustomNotification(message, type) {
+        const payload = {
+            channel: this.notificationChannel,
+            message: message,
+            type: type,
+            timestamp: new Date().toISOString(),
+            source: 'figma-sync',
+            metadata: {
+                fileId: this.fileId,
+                teamId: this.teamId,
+                versionBranch: this.versionBranch
+            }
+        };
+        
+        // 커스텀 웹훅 URL이 있으면 전송
+        if (this.webhookUrl) {
+            await axios.post(this.webhookUrl, payload);
         }
     }
 }
