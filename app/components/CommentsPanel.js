@@ -27,21 +27,11 @@ class CommentsPanel extends LynxComponent {
     this.isLoading = true
     
     try {
-      const script = document.createElement('script')
-      script.type = 'module'
-      script.textContent = `
-        import { videosApi } from '/src/api/videos.js';
-        const comments = await videosApi.getComments('${this.videoId}');
-        window.dispatchEvent(new CustomEvent('comments-loaded', { detail: comments }));
-      `
-      document.head.appendChild(script)
+      // Mock implementation - simulating API call
+      await new Promise(resolve => setTimeout(resolve, 500))
       
-      await new Promise((resolve) => {
-        window.addEventListener('comments-loaded', (e) => {
-          this.comments = e.detail
-          resolve()
-        }, { once: true })
-      })
+      // Load mock comments directly
+      this.loadMockComments()
     } catch (error) {
       console.error('Error loading comments:', error)
       this.loadMockComments()
@@ -93,24 +83,22 @@ class CommentsPanel extends LynxComponent {
     this.render()
     
     try {
-      const script = document.createElement('script')
-      script.type = 'module'
-      script.textContent = `
-        import { videosApi } from '/src/api/videos.js';
-        const comment = await videosApi.addComment('${this.videoId}', '${this.currentUserId}', '${savedText}');
-        window.dispatchEvent(new CustomEvent('comment-added', { detail: comment }));
-      `
-      document.head.appendChild(script)
+      // Mock implementation - simulating API call
+      await new Promise(resolve => setTimeout(resolve, 300))
       
-      await new Promise((resolve) => {
-        window.addEventListener('comment-added', (e) => {
-          const newComment = e.detail
-          this.comments = this.comments.map(c => 
-            c.id === tempComment.id ? newComment : c
-          )
-          resolve()
-        }, { once: true })
-      })
+      // Update the temporary comment with a permanent ID
+      const permanentComment = {
+        ...tempComment,
+        id: `comment-${Date.now()}`,
+        user: {
+          username: 'testuser',
+          profile_picture: null
+        }
+      }
+      
+      this.comments = this.comments.map(c => 
+        c.id === tempComment.id ? permanentComment : c
+      )
     } catch (error) {
       console.error('Error adding comment:', error)
       this.comments = this.comments.filter(c => c.id !== tempComment.id)
@@ -124,7 +112,7 @@ class CommentsPanel extends LynxComponent {
       bubbles: true,
       composed: true
     })
-    this.dispatchEvent(event)
+    window.dispatchEvent(event)
   }
 
   formatTime(dateString) {
