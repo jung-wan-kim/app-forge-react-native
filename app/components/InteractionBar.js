@@ -10,6 +10,7 @@ class InteractionBar extends LynxComponent {
   }
 
   constructor() {
+    super();
     this.videoId = ''
     this.likes = 0
     this.comments = 0

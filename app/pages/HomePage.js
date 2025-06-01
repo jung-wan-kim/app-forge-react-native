@@ -1,5 +1,6 @@
 class HomePage extends LynxComponent {
   constructor() {
+    super();
     this.commentsOpen = false
     this.currentVideoId = null
   }
@@ -19,6 +20,8 @@ class HomePage extends LynxComponent {
   }
 
   render() {
+    console.log('HomePage render called');
+    
     return lynx.div({
       style: {
         position: 'fixed',

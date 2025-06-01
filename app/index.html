@@ -65,21 +65,29 @@
       lynx.registerComponent('home-page', HomePage);
       lynx.registerComponent('profile-page', ProfilePage);
       lynx.registerComponent('upload-page', UploadPage);
-      lynx.registerComponent('app', App);
+      lynx.registerComponent('app-container', App);
       
       console.log('All components registered successfully');
       
       // 앱 시작 - DOM이 준비된 후 실행
-      document.addEventListener('DOMContentLoaded', () => {
+      function mountApp() {
         const app = document.getElementById('app');
         if (app) {
           console.log('Mounting app...');
-          lynx.mount(app, lynx.element('app'));
+          lynx.mount(app, lynx.element('app-container'));
           console.log('App mounted successfully');
         } else {
           console.error('App container not found');
         }
-      });
+      }
+      
+      // DOMContentLoaded가 이미 발생했을 수도 있으므로 체크
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mountApp);
+      } else {
+        // DOM is already ready
+        mountApp();
+      }
       
     } catch (error) {
       console.error('Component registration error:', error);

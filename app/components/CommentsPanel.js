@@ -6,6 +6,7 @@ class CommentsPanel extends LynxComponent {
   }
 
   constructor() {
+    super();
     this.videoId = ''
     this.isOpen = false
     this.comments = []

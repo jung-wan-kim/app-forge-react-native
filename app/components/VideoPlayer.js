@@ -7,6 +7,7 @@ class VideoPlayer extends LynxComponent {
   }
 
   constructor() {
+    super();
     this.videoUrl = ''
     this.isPlaying = true
     this.isMuted = false

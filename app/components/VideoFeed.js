@@ -5,6 +5,7 @@ class VideoFeed extends LynxComponent {
   }
 
   constructor() {
+    super();
     this.videos = []
     this.currentIndex = 0
     this.touchStartY = 0

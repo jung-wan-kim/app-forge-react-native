@@ -1,5 +1,6 @@
 class App extends LynxComponent {
   constructor() {
+    super();  // LynxComponent를 확장하므로 super() 필요
     this.currentPage = 'home'
   }
   
@@ -11,6 +12,8 @@ class App extends LynxComponent {
   }
   
   render() {
+    console.log('App render called, currentPage:', this.currentPage);
+    
     let pageContent
     
     switch(this.currentPage) {
@@ -35,7 +38,8 @@ class App extends LynxComponent {
         top: 0,
         left: 0,
         right: 0,
-        bottom: 0
+        bottom: 0,
+        backgroundColor: '#000'
       }
     }, [pageContent])
   }

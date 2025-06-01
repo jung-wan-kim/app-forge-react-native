@@ -4,6 +4,7 @@ class NavigationBar extends LynxComponent {
   }
 
   constructor() {
+    super();
     this.activeTab = 'home'
   }
 

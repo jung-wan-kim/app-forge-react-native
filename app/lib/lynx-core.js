@@ -107,16 +107,26 @@
     },
     
     mount(container, element) {
-      if (!container) return;
+      console.log('Lynx mount called', { container, element });
+      
+      if (!container) {
+        console.error('Mount failed: no container');
+        return;
+      }
       
       container.innerHTML = '';
       
       if (element && element.element) {
+        console.log('Mounting element with .element property');
         container.appendChild(element.element);
       } else if (element instanceof Element) {
+        console.log('Mounting Element instance');
         container.appendChild(element);
       } else if (typeof element === 'string') {
+        console.log('Mounting string content');
         container.innerHTML = element;
+      } else {
+        console.error('Mount failed: invalid element', element);
       }
     },
     
@@ -192,7 +202,7 @@
   // Simple LynxComponent base class for compatibility
   window.LynxComponent = class {
     constructor() {
-      this.shadowRoot = null;
+      // No initialization needed in base class
     }
     
     render() {

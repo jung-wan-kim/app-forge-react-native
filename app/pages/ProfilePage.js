@@ -5,6 +5,7 @@ class ProfilePage extends LynxComponent {
   }
   
   constructor() {
+    super();
     this.userId = 'test-user-1'
     this.isOwnProfile = true
     this.user = null

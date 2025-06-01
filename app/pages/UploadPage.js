@@ -1,5 +1,6 @@
 class UploadPage extends LynxComponent {
   constructor() {
+    super();
     this.selectedFile = null
     this.videoPreviewUrl = null
     this.description = ''
